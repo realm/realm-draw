@@ -47,7 +47,7 @@ namespace DrawXShared
     - the currently growing paths (one per app updating the shared Realm).
 
     However, with the paths, if we only worry about drawing _added_ or _changed_ paths
-    then we don't care if they are completed or not, just what more we have to draw of them.
+    then we don't care if they are completed or not, just that they are dirty.
 
     Caching and Responsiveness
     --------------------------
@@ -61,9 +61,7 @@ namespace DrawXShared
     - Many small, single "dab" strokes being drawn, say from someone tapping a display, 
       which mean we have, at least, a TouchesBegan and TouchesEnded and probably AddPoint in between.
     
-    We make use of a non-persistent field to help a given Draw differentiate which 
-    points it has processed - in the case of an incoming path it may have multiple points 
-    we have not yet seen.
+    We make simply monitor changes - any *added* or *changed* paths get redrawn. 
 
     Most importantly, to get the fastest possible response as the user moves their finger,
     we draw the local line immediately as a continuation of the path they started drawing 
@@ -207,7 +205,7 @@ namespace DrawXShared
                 //// we assume if at least one path deleted, drastic stuff happened, probably erase all
                 if (_allPaths.Count() == 0 || changes.DeletedIndices.Length > 0)
                 {
-                    Debug.WriteLine($"Realm notifier: Invalidating on Realm change as paths deleted or none");
+                    Debug.WriteLine($"Realm notifier: Invalidating on Realm change as some or all paths deleted or initially blank");
                     InvalidateCachedPaths();  // someone erased their tablet
                     RefreshOnRealmUpdate();
                     return;
@@ -224,7 +222,11 @@ namespace DrawXShared
                     return;
                 }
 
-                _pathsToDraw = new List<DrawPath>();
+                if (_pathsToDraw == null)
+                {
+                    _pathsToDraw = new List<DrawPath>();  // otherwise previous draw got interrupted.
+                }
+
                 foreach (var index in changes.InsertedIndices)
                 {
                     Debug.WriteLine($"Realm notifier: caching path object inserted at {index}");
@@ -423,7 +425,7 @@ namespace DrawXShared
                 _canvasSaveCount = canvas.SaveLayer(paint);  // cache everything to-date
                 _hasSavedBitmap = true;
             } // SKPaint
-
+            _pathsToDraw = null;
             _redrawPathsAtNextDraw = false;
         }
 
