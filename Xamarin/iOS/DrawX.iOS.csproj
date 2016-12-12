@@ -45,7 +45,7 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <PlatformTarget>x86</PlatformTarget>
-    <CodesignProvision>f40f74a3-3e08-4259-8956-f047456e3416</CodesignProvision>
+    <CodesignProvision></CodesignProvision>
     <BuildIpa>true</BuildIpa>
     <IpaIncludeArtwork>true</IpaIncludeArtwork>
     <IpaMetadata>DrawX_adhoc_iTunesMetadata.plist</IpaMetadata>
@@ -75,7 +75,7 @@
     <DefineConstants>DEBUG;ENABLE_TEST_CLOUD;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey>iPhone Developer</CodesignKey>
+    <CodesignKey>iPhone Distribution: Realm ApS (QX5CR2FTN2)</CodesignKey>
     <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <MtouchDebug>true</MtouchDebug>
     <MtouchFastDev>false</MtouchFastDev>
@@ -105,7 +105,7 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <PlatformTarget>x86</PlatformTarget>
-    <CodesignProvision>20f1c791-72da-4fff-911a-84a6af4f21ae</CodesignProvision>
+    <CodesignProvision>f40f74a3-3e08-4259-8956-f047456e3416</CodesignProvision>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

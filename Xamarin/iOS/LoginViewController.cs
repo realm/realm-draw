@@ -33,6 +33,13 @@ namespace DrawX.IOS
         {
         }
 
+        private void DoLogin()
+        {
+            bool changedServer = DrawXSettingsManager.UpdateCredentials(ServerEntry.Text, UsernameEntry.Text, PasswordEntry.Text);
+            //// TODO handle failure to login
+            OnCloseLogin(changedServer);
+        }
+
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
@@ -43,15 +50,34 @@ namespace DrawX.IOS
 
             LoginButton.TouchUpInside += (sender, e) =>
             {
-                bool changedServer = DrawXSettingsManager.UpdateCredentials(ServerEntry.Text,  UsernameEntry.Text, PasswordEntry.Text);
-                //// TODO handle failure to login
-                OnCloseLogin(changedServer);
+                DoLogin();
             };
 
             CancelButton.TouchUpInside += (sender, e) =>
             {
                 OnCloseLogin(false);
             };
+
+            ServerEntry.ShouldReturn += (textField) =>
+            {
+                UsernameEntry.BecomeFirstResponder();
+                return false;  // no linebreak insertion
+            };
+
+            UsernameEntry.ShouldReturn += (textField) =>
+            {
+                PasswordEntry.BecomeFirstResponder();
+                return false;
+            };
+
+
+            PasswordEntry.ShouldReturn += (textField) =>
+            {
+                ((UITextField)textField).ResignFirstResponder();
+                DoLogin();
+                return false;
+            };
         }
+
     }
 }

@@ -25,10 +25,13 @@ using UIKit;
 
 namespace DrawX.IOS
 {
+    // Most of the ViewController logic is factored out here so we can subclass
+    // with a local copy in case we want a debug build which bypasses nuget as a Realm source
     public class ViewControllerShared : UIViewController
     {
         private RealmDraw _drawer;
         private bool _hasShownCredentials;  // flag to show on initial layout only
+        private CoreGraphics.CGRect _prevBounds;
 
         public ViewControllerShared(IntPtr handle) : base(handle)
         {
@@ -56,6 +59,7 @@ namespace DrawX.IOS
             _drawer = new RealmDraw(
                                     2.0f * (float)View.Bounds.Width,
                                     2.0f * (float)View.Bounds.Height);
+            _prevBounds = View.Bounds;
             _drawer.CredentialsEditor = () =>
             {
                 InvokeOnMainThread(EditCredentials);
@@ -63,7 +67,7 @@ namespace DrawX.IOS
             _drawer.RefreshOnRealmUpdate = () =>
             {
                 Debug.WriteLine("Refresh callback triggered by Realm");
-                View?.SetNeedsDisplay();  // just refresh on notification
+                View?.SetNeedsDisplay();  // just refresh on notification, OnPaintSample below triggers DrawTouches
             };
         }
 
@@ -73,7 +77,15 @@ namespace DrawX.IOS
 
             // this is the earliest we can show the modal login
             // show unconditionally on launch
-            if (!_hasShownCredentials)
+            if (_hasShownCredentials)
+            {
+                if (View.Bounds != _prevBounds) 
+                {
+                    SetupDrawer();
+                    View?.SetNeedsDisplay();
+                }
+            }
+            else
             {
                 EditCredentials();
                 _hasShownCredentials = true;
