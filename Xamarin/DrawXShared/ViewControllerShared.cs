@@ -32,9 +32,11 @@ namespace DrawX.IOS
         private RealmDraw _drawer;
         private bool _hasShownCredentials;  // flag to show on initial layout only
         private CoreGraphics.CGRect _prevBounds;
+        private float _devicePixelMul;  // usually 2.0 except on weird iPhone 6+
 
         public ViewControllerShared(IntPtr handle) : base(handle)
         {
+            _devicePixelMul =  (float)UIScreen.MainScreen.Scale;
         }
 
         public override void ViewDidLoad()
@@ -57,8 +59,8 @@ namespace DrawX.IOS
         {
             // scale bounds to match the pixel dimensions of the SkiaSurface
             _drawer = new RealmDraw(
-                                    2.0f * (float)View.Bounds.Width,
-                                    2.0f * (float)View.Bounds.Height);
+                _devicePixelMul * (float)View.Bounds.Width,
+                _devicePixelMul * (float)View.Bounds.Height);
             _prevBounds = View.Bounds;
             _drawer.CredentialsEditor = () =>
             {
@@ -104,7 +106,7 @@ namespace DrawX.IOS
             if (touch != null)
             {
                 var point = touch.LocationInView(View);
-                _drawer?.StartDrawing((float)point.X * 2.0f, (float)point.Y * 2.0f);
+                _drawer?.StartDrawing((float)point.X * _devicePixelMul, (float)point.Y * _devicePixelMul);
                 Debug.WriteLine("TouchesBegan before SetNeedsDisplay");
                 View.SetNeedsDisplay();  // probably after touching Pencils
                 Debug.WriteLine("TouchesBegan afer SetNeedsDisplay");
@@ -118,7 +120,7 @@ namespace DrawX.IOS
             if (touch != null)
             {
                 var point = touch.LocationInView(View);
-                _drawer?.AddPoint((float)point.X * 2.0f, (float)point.Y * 2.0f);
+                _drawer?.AddPoint((float)point.X * _devicePixelMul, (float)point.Y * _devicePixelMul);
                 Debug.WriteLine("TouchesMoved returned from AddPoint, about to SetNeedsDisplay.");
                 View.SetNeedsDisplay();
                 Debug.WriteLine("TouchesMoved after SetNeedsDisplay.");
@@ -142,7 +144,7 @@ namespace DrawX.IOS
             if (touch != null)
             {
                 var point = touch.LocationInView(View);
-                _drawer?.StopDrawing((float)point.X * 2.0f, (float)point.Y * 2.0f);
+                _drawer?.StopDrawing((float)point.X * _devicePixelMul, (float)point.Y * _devicePixelMul);
             }
 
             View.SetNeedsDisplay();
