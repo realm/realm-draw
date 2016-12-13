@@ -190,6 +190,12 @@ namespace DrawXShared
 
             var loginConf = new SyncConfiguration(user, new Uri($"realm://{s.ServerIP}/~/Draw"));
             _realm = Realm.GetInstance(loginConf);
+            SetupPathChangeMonitoring();
+            _waitingForLogin = false;
+        }
+
+        private void SetupPathChangeMonitoring()
+        {
             _allPaths = _realm.All<DrawPath>() as IQueryable<DrawPath>;
             _allPaths.SubscribeForNotifications((sender, changes, error) =>
             {
@@ -238,7 +244,6 @@ namespace DrawXShared
 
                 RefreshOnRealmUpdate();
             });
-            _waitingForLogin = false;
         }
 
         private void ScalePointsToStore(ref float w, ref float h)
