@@ -61,7 +61,7 @@ namespace DrawXShared
     - Many small, single "dab" strokes being drawn, say from someone tapping a display, 
       which mean we have, at least, a TouchesBegan and TouchesEnded and probably AddPoint in between.
     
-    We make simply monitor changes - any *added* or *changed* paths get redrawn. 
+    We simply monitor changes - any *added* or *changed* paths get redrawn **entirely**.
 
     Most importantly, to get the fastest possible response as the user moves their finger,
     we draw the local line immediately as a continuation of the path they started drawing 

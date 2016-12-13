@@ -25,7 +25,7 @@ namespace DrawXShared
 {
     internal static class DrawXSettingsManager
     {
-        private static Realm _realmLocalSettings;
+        private static Realm _localSettingsRealm;
         private static DrawXSettings _savedSettings;
 
         public static DrawXSettings Settings
@@ -34,7 +34,7 @@ namespace DrawXShared
             {
                 if (_savedSettings == null)
                 {
-                    _savedSettings = _realmLocalSettings.All<DrawXSettings>().FirstOrDefault();
+                    _savedSettings = _localSettingsRealm.All<DrawXSettings>().FirstOrDefault();
                 }
 
                 if (_savedSettings == null)
@@ -42,7 +42,7 @@ namespace DrawXShared
                     Write(() =>
                     {
                         _savedSettings = new DrawXSettings { LastColorUsed = "Indigo" };
-                        _realmLocalSettings.Add(_savedSettings);
+                        _localSettingsRealm.Add(_savedSettings);
                     });
                 }
 
@@ -55,13 +55,13 @@ namespace DrawXShared
             var settingsConf = new RealmConfiguration("DrawXsettings.realm");
             settingsConf.ObjectClasses = new[] { typeof(DrawXSettings) };
             settingsConf.SchemaVersion = 2;  // set explicitly and bump as we add setting properties
-            _realmLocalSettings = Realm.GetInstance(settingsConf);
+            _localSettingsRealm = Realm.GetInstance(settingsConf);
         }
 
         // bit of a hack which only works when the caller has objects already on the _realmLocalSettings Realm
         internal static void Write(Action writer)
         {
-            _realmLocalSettings.Write(writer);
+            _localSettingsRealm.Write(writer);
         }
 
         internal static bool UpdateCredentials(string serverIP, string username, string password)
@@ -75,7 +75,7 @@ namespace DrawXShared
             // crashes if ServerIP is null            bool changedServer = string.IsNullOrEmpty(_savedSettings.ServerIP) || !_savedSettings.ServerIP.Equals(serverIP);
             var changedServer = _savedSettings.ServerIP == null ||
                                  !_savedSettings.ServerIP.Equals(serverIP);
-            _realmLocalSettings.Write(() =>
+            _localSettingsRealm.Write(() =>
             {
                 _savedSettings.ServerIP = serverIP;
                 _savedSettings.Username = username;

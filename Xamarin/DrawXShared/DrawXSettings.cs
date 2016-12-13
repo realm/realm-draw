@@ -20,7 +20,7 @@ using Realms;
 
 namespace DrawXShared
 {
-    // just stash one instance
+    // will only ever have a single object stored in the Realm
     public class DrawXSettings : RealmObject
     {
         public string LastColorUsed { get; set; }
