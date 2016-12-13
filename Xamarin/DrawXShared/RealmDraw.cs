@@ -120,37 +120,34 @@ namespace DrawXShared
         #region Settings
         private DrawXSettings Settings => DrawXSettingsManager.Settings;
 
-        private int _currentColorIndex = -1;  //// for quick check if pencil we draw is current color
-
-        private SwatchColor _currentColor;
+        private int _currentColorIndex = -1;  //// store as int for quick check if pencil we draw is current color
 
         private SwatchColor CurrentColor
         {
             get
             {
-                if (string.IsNullOrEmpty(_currentColor.Name))
+                if (_currentColorIndex == -1)
                 {
                     InitCurrentColor();
                 }
 
-                return _currentColor;
+                return SwatchColor.Colors[_currentColorIndex];
             }
 
             set
             {
-                if (!_currentColor.Name.Equals(value.Name))
+                if (_currentColorIndex == -1 || !value.Name.Equals(SwatchColor.Colors[_currentColorIndex]))
                 {
-                    _currentColor = value;
-                    DrawXSettingsManager.Write(() => Settings.LastColorUsed = _currentColor.Name);
-                    _currentColorIndex = SwatchColor.Colors.IndexOf(_currentColor);
+                    DrawXSettingsManager.Write(() => Settings.LastColorUsed = value.Name);
+                    _currentColorIndex = SwatchColor.Colors.IndexOf(value);
                 }
             }
         }
 
         private void InitCurrentColor()
         {
-            _currentColor = SwatchColor.ColorsByName [Settings.LastColorUsed];
-            _currentColorIndex = SwatchColor.Colors.IndexOf(_currentColor);
+             var currentByName = SwatchColor.ColorsByName [Settings.LastColorUsed];
+            _currentColorIndex = SwatchColor.Colors.IndexOf(currentByName);
         }
         #endregion Settings
 

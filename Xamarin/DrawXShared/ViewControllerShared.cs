@@ -169,7 +169,7 @@ namespace DrawX.IOS
                 {
                     if (DrawXSettingsManager.HasCredentials())
                     {
-                        SetupDrawer();  // pointless unless contact server
+                        SetupDrawer();
                         _drawer.LoginToServerAsync();
                     }
                     //// TODO allow user to launch locally if server not available
