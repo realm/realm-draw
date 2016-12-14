@@ -548,7 +548,11 @@ namespace DrawXShared
         public void ErasePaths()
         {
             InvalidateCachedPaths();
-            _realm.Write(() => _realm.RemoveAll<DrawPath>());
+            _realm.Write(() => 
+            {
+                _realm.RemoveAll<DrawPath>();
+                _realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310
+            });
         }
     }
 }
