@@ -50,6 +50,9 @@
     <Reference Include="Remotion.Linq">
       <HintPath>..\packages\Remotion.Linq.2.1.1\lib\portable-net45+win+wpa81+wp80\Remotion.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="Realm">
+      <HintPath>..\packages\Realm.0.80.0\lib\MonoAndroid44\Realm.dll</HintPath>
+    </Reference>
     <Reference Include="SkiaSharp">
       <HintPath>..\packages\SkiaSharp.1.55.1\lib\MonoAndroid\SkiaSharp.dll</HintPath>
     </Reference>
@@ -68,12 +71,13 @@
     <Compile Include="Resources\Resource.designer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>      
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+          <ExcludeFromStyleCop>true</ExcludeFromStyleCop>      
+    </Compile>
+    <Compile Include="Screens\LoginDialog.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
-    <None Include="Assets\AboutAssets.txt" />
     <None Include="packages.config" />
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
