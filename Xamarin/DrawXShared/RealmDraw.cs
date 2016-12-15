@@ -338,7 +338,9 @@ namespace DrawXShared
         {
             using (var path = new SKPath())
             {
-                var pathColor = SwatchColor.ColorsByName[drawPath.color].Color;
+                // nasty hack because the Cocoa version defaults to Black
+                var pathColorName = (drawPath.color == "Black") ? "Charcoal" : drawPath.color;
+                var pathColor = SwatchColor.ColorsByName[pathColorName].Color;
                 paint.Color = pathColor;
                 var isFirst = true;
                 foreach (var point in drawPath.points)
@@ -548,7 +550,11 @@ namespace DrawXShared
         public void ErasePaths()
         {
             InvalidateCachedPaths();
-            _realm.Write(() => _realm.RemoveAll<DrawPath>());
+            _realm.Write(() => 
+            {
+                _realm.RemoveAll<DrawPath>();
+                _realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310
+            });
         }
     }
 }
