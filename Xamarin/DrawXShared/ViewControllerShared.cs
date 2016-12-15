@@ -18,6 +18,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading;
 using DrawXShared;
 using Foundation;
 using SkiaSharp.Views.iOS;
@@ -36,7 +37,7 @@ namespace DrawX.IOS
 
         public ViewControllerShared(IntPtr handle) : base(handle)
         {
-            _devicePixelMul =  (float)UIScreen.MainScreen.Scale;
+            _devicePixelMul = (float)UIScreen.MainScreen.Scale;
         }
 
         public override void ViewDidLoad()
@@ -81,7 +82,7 @@ namespace DrawX.IOS
             // show unconditionally on launch
             if (_hasShownCredentials)
             {
-                if (View.Bounds != _prevBounds) 
+                if (View.Bounds != _prevBounds)
                 {
                     SetupDrawer();
                     View?.SetNeedsDisplay();
@@ -154,7 +155,17 @@ namespace DrawX.IOS
         {
             if (eType == UIEventSubtype.MotionShake)
             {
-                _drawer?.ErasePaths();
+                var alert = UIAlertController.Create(
+                    "Erase Canvas?",
+                    "This will clear the shared Realm database and erase the canvas. Are you sure you wish to proceed?",
+                    UIAlertControllerStyle.Alert);
+                alert.AddAction(UIAlertAction.Create("Erase", UIAlertActionStyle.Destructive, action => _drawer?.ErasePaths()));
+                alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, null));
+                if (alert.PopoverPresentationController != null)
+                {
+                    alert.PopoverPresentationController.SourceView = View;
+                }
+                PresentViewController(alert, animated:true, completionHandler:null);
                 //// unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
             }
         }
