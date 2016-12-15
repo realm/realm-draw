@@ -338,7 +338,9 @@ namespace DrawXShared
         {
             using (var path = new SKPath())
             {
-                var pathColor = SwatchColor.ColorsByName[drawPath.color].Color;
+                // nasty hack because the Cocoa version defaults to Black
+                var pathColorName = (drawPath.color == "Black") ? "Charcoal" : drawPath.color;
+                var pathColor = SwatchColor.ColorsByName[pathColorName].Color;
                 paint.Color = pathColor;
                 var isFirst = true;
                 foreach (var point in drawPath.points)

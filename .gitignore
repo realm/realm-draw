@@ -104,3 +104,4 @@ iOSInjectionProject/
 Xamarin/packages
 *.userprefs
 obj
+RealmWeaver.Fody.dll
