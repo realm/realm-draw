@@ -154,7 +154,7 @@ namespace DrawX.IOS
         {
             if (eType == UIEventSubtype.MotionShake)
             {
-                _drawer.ErasePaths();
+                _drawer?.ErasePaths();
                 //// unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
             }
         }
