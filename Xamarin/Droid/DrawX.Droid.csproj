@@ -60,7 +60,7 @@
       <HintPath>..\packages\Realm.Database.0.81.0\lib\MonoAndroid44\Realm.dll</HintPath>
     </Reference>
     <Reference Include="Realm.Sync">
-      <HintPath>..\packages\Realm.0.80.0\lib\MonoAndroid44\Realm.Sync.dll</HintPath>
+      <HintPath>..\packages\Realm.0.81.0\lib\MonoAndroid44\Realm.Sync.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -68,12 +68,13 @@
     <Compile Include="Resources\Resource.designer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>      
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+          <ExcludeFromStyleCop>true</ExcludeFromStyleCop>      
+    </Compile>
+    <Compile Include="Screens\LoginDialog.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
-    <None Include="Assets\AboutAssets.txt" />
     <None Include="packages.config" />
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
@@ -90,6 +91,7 @@
   <Import Project="..\DrawXShared\DrawXShared.projitems" Label="Shared" Condition="Exists('..\DrawXShared\DrawXShared.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\Fody.1.29.4\build\dotnet\Fody.targets" Condition="Exists('..\packages\Fody.1.29.4\build\dotnet\Fody.targets')" />
-  <Import Project="..\packages\Realm.Database.0.81.0\build\Realm.Database.targets" Condition="Exists('..\packages\Realm.Database.0.81.0\build\Realm.Database.targets')" />
   <Import Project="..\packages\Realm.0.80.0\build\Realm.targets" Condition="Exists('..\packages\Realm.0.80.0\build\Realm.targets')" />
+  <Import Project="..\packages\Realm.Database.0.81.0\build\Realm.Database.targets" Condition="Exists('..\packages\Realm.Database.0.81.0\build\Realm.Database.targets')" />
+  <Import Project="..\packages\Realm.0.81.0\build\Realm.targets" Condition="Exists('..\packages\Realm.0.81.0\build\Realm.targets')" />
 </Project>
