@@ -1,0 +1,425 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2290FFC21E2FD8E30039DACF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFAE1E2FD8E30039DACF /* AppDelegate.m */; };
+		2290FFC41E2FD8E30039DACF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2290FFB21E2FD8E30039DACF /* Images.xcassets */; };
+		2290FFC51E2FD8E30039DACF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFB31E2FD8E30039DACF /* main.m */; };
+		2290FFC61E2FD8E30039DACF /* DrawPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFB61E2FD8E30039DACF /* DrawPath.m */; };
+		2290FFC71E2FD8E30039DACF /* DrawPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFB81E2FD8E30039DACF /* DrawPoint.m */; };
+		2290FFC81E2FD8E30039DACF /* UIColor+Realm.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFBA1E2FD8E30039DACF /* UIColor+Realm.m */; };
+		2290FFC91E2FD8E30039DACF /* CanvasView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFBD1E2FD8E30039DACF /* CanvasView.m */; };
+		2290FFCA1E2FD8E30039DACF /* DrawView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFBF1E2FD8E30039DACF /* DrawView.m */; };
+		2290FFCB1E2FD8E30039DACF /* SwatchesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2290FFC11E2FD8E30039DACF /* SwatchesView.m */; };
+		F6E3A850A7ABFE0175816416 /* libPods-RealmDraw iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E8B7242B14B7BB2BE0AE935 /* libPods-RealmDraw iOS.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		2290FF5A1E2FD7230039DACF /* RealmDraw iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RealmDraw iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2290FFAD1E2FD8E30039DACF /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		2290FFAE1E2FD8E30039DACF /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		2290FFAF1E2FD8E30039DACF /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
+		2290FFB01E2FD8E30039DACF /* Draw-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Draw-Info.plist"; sourceTree = "<group>"; };
+		2290FFB21E2FD8E30039DACF /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		2290FFB31E2FD8E30039DACF /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		2290FFB51E2FD8E30039DACF /* DrawPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawPath.h; sourceTree = "<group>"; };
+		2290FFB61E2FD8E30039DACF /* DrawPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawPath.m; sourceTree = "<group>"; };
+		2290FFB71E2FD8E30039DACF /* DrawPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawPoint.h; sourceTree = "<group>"; };
+		2290FFB81E2FD8E30039DACF /* DrawPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawPoint.m; sourceTree = "<group>"; };
+		2290FFB91E2FD8E30039DACF /* UIColor+Realm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+Realm.h"; sourceTree = "<group>"; };
+		2290FFBA1E2FD8E30039DACF /* UIColor+Realm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Realm.m"; sourceTree = "<group>"; };
+		2290FFBC1E2FD8E30039DACF /* CanvasView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CanvasView.h; sourceTree = "<group>"; };
+		2290FFBD1E2FD8E30039DACF /* CanvasView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CanvasView.m; sourceTree = "<group>"; };
+		2290FFBE1E2FD8E30039DACF /* DrawView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawView.h; sourceTree = "<group>"; };
+		2290FFBF1E2FD8E30039DACF /* DrawView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawView.m; sourceTree = "<group>"; };
+		2290FFC01E2FD8E30039DACF /* SwatchesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwatchesView.h; sourceTree = "<group>"; };
+		2290FFC11E2FD8E30039DACF /* SwatchesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwatchesView.m; sourceTree = "<group>"; };
+		28163A59F031AA27BCE52FE4 /* Pods-RealmDraw iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RealmDraw iOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-RealmDraw iOS/Pods-RealmDraw iOS.release.xcconfig"; sourceTree = "<group>"; };
+		4E8B7242B14B7BB2BE0AE935 /* libPods-RealmDraw iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RealmDraw iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9CA1560200F93E9FAF20FA34 /* Pods-RealmDraw iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RealmDraw iOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RealmDraw iOS/Pods-RealmDraw iOS.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2290FF571E2FD7230039DACF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F6E3A850A7ABFE0175816416 /* libPods-RealmDraw iOS.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2290FF511E2FD7230039DACF = {
+			isa = PBXGroup;
+			children = (
+				2290FF901E2FD83C0039DACF /* RealmDraw iOS */,
+				2290FF5B1E2FD7230039DACF /* Products */,
+				C4117E3AC1DE3684871B5DA3 /* Pods */,
+				9A8135A70906621D0891CE15 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		2290FF5B1E2FD7230039DACF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2290FF5A1E2FD7230039DACF /* RealmDraw iOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2290FF901E2FD83C0039DACF /* RealmDraw iOS */ = {
+			isa = PBXGroup;
+			children = (
+				2290FFAD1E2FD8E30039DACF /* AppDelegate.h */,
+				2290FFAE1E2FD8E30039DACF /* AppDelegate.m */,
+				2290FFAF1E2FD8E30039DACF /* Constants.h */,
+				2290FFB01E2FD8E30039DACF /* Draw-Info.plist */,
+				2290FFB21E2FD8E30039DACF /* Images.xcassets */,
+				2290FFB31E2FD8E30039DACF /* main.m */,
+				2290FFB41E2FD8E30039DACF /* Models */,
+				2290FFBB1E2FD8E30039DACF /* Views */,
+			);
+			path = "RealmDraw iOS";
+			sourceTree = "<group>";
+		};
+		2290FFB41E2FD8E30039DACF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2290FFB51E2FD8E30039DACF /* DrawPath.h */,
+				2290FFB61E2FD8E30039DACF /* DrawPath.m */,
+				2290FFB71E2FD8E30039DACF /* DrawPoint.h */,
+				2290FFB81E2FD8E30039DACF /* DrawPoint.m */,
+				2290FFB91E2FD8E30039DACF /* UIColor+Realm.h */,
+				2290FFBA1E2FD8E30039DACF /* UIColor+Realm.m */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2290FFBB1E2FD8E30039DACF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2290FFBC1E2FD8E30039DACF /* CanvasView.h */,
+				2290FFBD1E2FD8E30039DACF /* CanvasView.m */,
+				2290FFBE1E2FD8E30039DACF /* DrawView.h */,
+				2290FFBF1E2FD8E30039DACF /* DrawView.m */,
+				2290FFC01E2FD8E30039DACF /* SwatchesView.h */,
+				2290FFC11E2FD8E30039DACF /* SwatchesView.m */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		9A8135A70906621D0891CE15 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4E8B7242B14B7BB2BE0AE935 /* libPods-RealmDraw iOS.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C4117E3AC1DE3684871B5DA3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9CA1560200F93E9FAF20FA34 /* Pods-RealmDraw iOS.debug.xcconfig */,
+				28163A59F031AA27BCE52FE4 /* Pods-RealmDraw iOS.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2290FF591E2FD7230039DACF /* RealmDraw iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2290FF871E2FD7230039DACF /* Build configuration list for PBXNativeTarget "RealmDraw iOS" */;
+			buildPhases = (
+				6E872CB4A289A4942E679B27 /* [CP] Check Pods Manifest.lock */,
+				2290FFCC1E2FDBB30039DACF /* Get Current Device IP Address */,
+				2290FF561E2FD7230039DACF /* Sources */,
+				2290FF571E2FD7230039DACF /* Frameworks */,
+				2290FF581E2FD7230039DACF /* Resources */,
+				DCB48CDC22CD930AB5810776 /* [CP] Embed Pods Frameworks */,
+				86C8B5E3BA3C5A77218998F3 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "RealmDraw iOS";
+			productName = RealmDraw;
+			productReference = 2290FF5A1E2FD7230039DACF /* RealmDraw iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2290FF521E2FD7230039DACF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = Realm;
+				TargetAttributes = {
+					2290FF591E2FD7230039DACF = {
+						CreatedOnToolsVersion = 8.2;
+						DevelopmentTeam = QX5CR2FTN2;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 2290FF551E2FD7230039DACF /* Build configuration list for PBXProject "RealmDraw" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2290FF511E2FD7230039DACF;
+			productRefGroup = 2290FF5B1E2FD7230039DACF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2290FF591E2FD7230039DACF /* RealmDraw iOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2290FF581E2FD7230039DACF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2290FFC41E2FD8E30039DACF /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2290FFCC1E2FDBB30039DACF /* Get Current Device IP Address */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Get Current Device IP Address";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "LOCAL_IP_ADDR=$(ipconfig getifaddr $(netstat -f inet -rant | awk '/default/ { print $6; exit }'))\necho \"static NSString * const kIPAddress = @\\\"${LOCAL_IP_ADDR:-127.0.0.1}\\\";\" > \"$SRCROOT/RealmDraw iOS/Constants.h\"";
+		};
+		6E872CB4A289A4942E679B27 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		86C8B5E3BA3C5A77218998F3 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-RealmDraw iOS/Pods-RealmDraw iOS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DCB48CDC22CD930AB5810776 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-RealmDraw iOS/Pods-RealmDraw iOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2290FF561E2FD7230039DACF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2290FFC51E2FD8E30039DACF /* main.m in Sources */,
+				2290FFC81E2FD8E30039DACF /* UIColor+Realm.m in Sources */,
+				2290FFC91E2FD8E30039DACF /* CanvasView.m in Sources */,
+				2290FFC61E2FD8E30039DACF /* DrawPath.m in Sources */,
+				2290FFCA1E2FD8E30039DACF /* DrawView.m in Sources */,
+				2290FFC71E2FD8E30039DACF /* DrawPoint.m in Sources */,
+				2290FFCB1E2FD8E30039DACF /* SwatchesView.m in Sources */,
+				2290FFC21E2FD8E30039DACF /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2290FF851E2FD7230039DACF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2290FF861E2FD7230039DACF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		2290FF881E2FD7230039DACF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9CA1560200F93E9FAF20FA34 /* Pods-RealmDraw iOS.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = QX5CR2FTN2;
+				INFOPLIST_FILE = "$(SRCROOT)/RealmDraw iOS/Draw-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.realm.RealmDraw;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		2290FF891E2FD7230039DACF /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 28163A59F031AA27BCE52FE4 /* Pods-RealmDraw iOS.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = QX5CR2FTN2;
+				INFOPLIST_FILE = "$(SRCROOT)/RealmDraw iOS/Draw-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.realm.RealmDraw;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2290FF551E2FD7230039DACF /* Build configuration list for PBXProject "RealmDraw" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2290FF851E2FD7230039DACF /* Debug */,
+				2290FF861E2FD7230039DACF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2290FF871E2FD7230039DACF /* Build configuration list for PBXNativeTarget "RealmDraw iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2290FF881E2FD7230039DACF /* Debug */,
+				2290FF891E2FD7230039DACF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2290FF521E2FD7230039DACF /* Project object */;
+}
