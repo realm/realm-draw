@@ -15,13 +15,14 @@ Download links and installation instructions:
 
 Follow the README files in the platform-specific subdirectory of this repository.
 
+* [Android][4]
+* [iOS][5]
+* [Xamarin][6]
+
 # Known Issues
 
 The Android and iOS versions of the app will interoperate; the Xamarin version currently can only share drawings with other copies of itself (compiled for either iOS or Android). This is due to a difference in the way the Xamarin platform handles its drawing canvas compared to the native iOS and Android code bases.
 
-* [Android][4]
-* [iOS][5]
-* [Xamarin][6]
 
 [1]: https://realm.io/news/introducing-realm-mobile-platform/
 [2]: https://realm.io/docs/get-started/installation/mac/
