@@ -105,3 +105,4 @@ Xamarin/packages
 *.userprefs
 obj
 RealmWeaver.Fody.dll
+.DS_Store
