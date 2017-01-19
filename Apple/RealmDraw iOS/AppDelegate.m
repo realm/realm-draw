@@ -35,6 +35,7 @@
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = [[UIViewController alloc] init];
+    self.window.rootViewController.view.backgroundColor = [UIColor whiteColor];
 
     // Setup Global Error Handler
     [RLMSyncManager sharedManager].errorHandler = ^(NSError *error, RLMSyncSession *session) {
@@ -43,7 +44,7 @@
     
     [self.window makeKeyAndVisible];
     
-    RLMLoginViewController *loginController = [[RLMLoginViewController alloc] initWithStyle:LoginViewControllerStyleLightOpaque];
+    RLMLoginViewController *loginController = [[RLMLoginViewController alloc] initWithStyle:LoginViewControllerStyleLightTranslucent];
     loginController.serverURL = kIPAddress;
     [self.window.rootViewController presentViewController:loginController animated:NO completion:nil];
     
