@@ -23,10 +23,6 @@
 
 @import RealmLoginKit;
 
-@interface AppDelegate ()
-@property (nonatomic, strong) UIActivityIndicatorView *activityIndicatorView;
-@end
-
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -41,13 +37,13 @@
     [RLMSyncManager sharedManager].errorHandler = ^(NSError *error, RLMSyncSession *session) {
         NSLog(@"A global error has occurred! %@", error);
     };
-    
+
     [self.window makeKeyAndVisible];
-    
+
     RLMLoginViewController *loginController = [[RLMLoginViewController alloc] initWithStyle:LoginViewControllerStyleLightTranslucent];
     loginController.serverURL = kIPAddress;
     [self.window.rootViewController presentViewController:loginController animated:NO completion:nil];
-    
+
     __weak typeof(loginController) weakController = loginController;
     loginController.logInSuccessfulHandler = ^(RLMSyncUser *user) {
         // Logged in setup the default Realm
@@ -65,7 +61,7 @@
 
         [self.window.rootViewController dismissViewControllerAnimated:YES completion:nil];
     };
-    
+
     return YES;
 }
 
