@@ -28,5 +28,5 @@ The Android and iOS versions of the app will interoperate; the Xamarin version c
 [2]: https://realm.io/docs/get-started/installation/mac/
 [3]: https://realm.io/docs/get-started/installation/linux/
 [4]: https://github.com/realm-demos/realm-draw/tree/master/Android
-[5]: https://github.com/realm-demos/realm-draw/tree/master/Xamarin/iOS
+[5]: https://github.com/realm-demos/realm-draw/tree/master/Apple
 [6]: https://github.com/realm-demos/realm-draw/tree/master/Xamarin
