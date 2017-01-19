@@ -1,14 +1,30 @@
 PODS:
-  - Realm (2.2.0):
-    - Realm/Headers (= 2.2.0)
-  - Realm/Headers (2.2.0)
+  - Realm (2.3.0):
+    - Realm/Headers (= 2.3.0)
+  - Realm/Headers (2.3.0)
+  - RealmLoginKit (0.0.4):
+    - Realm
+    - TORoundedTableView
+  - TORoundedTableView (0.0.3)
 
 DEPENDENCIES:
   - Realm
+  - RealmLoginKit (from `https://github.com/realm-demos/realm-loginkit.git`)
+
+EXTERNAL SOURCES:
+  RealmLoginKit:
+    :git: https://github.com/realm-demos/realm-loginkit.git
+
+CHECKOUT OPTIONS:
+  RealmLoginKit:
+    :commit: e7ab8a18b1a7ccb4961c8827dfc425351255f6d3
+    :git: https://github.com/realm-demos/realm-loginkit.git
 
 SPEC CHECKSUMS:
-  Realm: d95b8fb34c83f1e764b66d319277a62c2b6e4bf5
+  Realm: 69d7de9aa569a11eed490aaabc8f2109e3985ecf
+  RealmLoginKit: 85bf918458cdd1a398354817af45f86c893838f5
+  TORoundedTableView: 4155565233135d81d6626a0c4ecfba27991cf2b1
 
-PODFILE CHECKSUM: 70db36f5fb1f83c70ae6bd7613dd6f72862e1ab1
+PODFILE CHECKSUM: 737d2fd3dbe3c335c6859549f997afa101abd16b
 
 COCOAPODS: 1.1.1
