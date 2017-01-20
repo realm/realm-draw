@@ -5,7 +5,7 @@ target 'RealmDraw iOS' do
 	use_frameworks!
 
 	pod 'Realm'
-	pod 'RealmLoginKit', :git => 'https://github.com/realm-demos/realm-loginkit.git'
+	pod 'RealmLoginKit'
 end
 
 post_install do |installer|

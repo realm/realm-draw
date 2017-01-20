@@ -45,7 +45,7 @@
     [self.window.rootViewController presentViewController:loginController animated:NO completion:nil];
 
     __weak typeof(loginController) weakController = loginController;
-    loginController.logInSuccessfulHandler = ^(RLMSyncUser *user) {
+    loginController.loginSuccessfulHandler = ^(RLMSyncUser *user) {
         // Logged in setup the default Realm
         // The Realm virtual path on the server.
         // The `~` represents the Realm user ID. Since the user ID is not known until you
