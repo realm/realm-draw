@@ -25,6 +25,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -110,24 +113,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private void initializeShakeSensor() {
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometerSensor = sensorManager
-                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         shakeSensorEventListener = new ShakeSensorEventListener();
         shakeSensorEventListener.setOnShakeListener(new ShakeSensorEventListener.OnShakeListener() {
 
             @Override
             public void onShake(int count) {
                 wipeCanvas();
-            }
-        });
-    }
-
-    private void wipeCanvas() {
-        Realm bgRealm = Realm.getDefaultInstance();
-        bgRealm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.deleteAll();
             }
         });
     }
@@ -181,6 +173,18 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         colorIdToName.put(R.id.melon, "Melon");
     }
 
+    private void wipeCanvas() {
+        if(realm != null) {
+            realm.executeTransactionAsync(new Realm.Transaction() {
+                @Override
+                public void execute(Realm r) {
+                    r.deleteAll();
+                }
+            });
+        }
+    }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -192,6 +196,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        if(realm == null) {
+            return false; // if we are in the middle of a rotation, realm may be null.
+        }
+
         int[] viewLocation = new int[2];
         surfaceView.getLocationInWindow(viewLocation);
         int action = event.getAction();
