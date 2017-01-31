@@ -19,7 +19,7 @@ android {
             // It is assumed that this machine is also running the Object Server.
             // If not, replace 'host' with the IP of the machine hosting the server.
             buildConfigField "String", "OBJECT_SERVER_IP", "\"${host}\""
-       }
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
