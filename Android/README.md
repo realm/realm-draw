@@ -19,5 +19,5 @@ This version is the iOS version, as demonstrated in the Realm Mobile Platform de
 
 ![Nexus 6P](AndroidPhoneScreenshot.png?raw=true "Nexus 6p")
 
-![Pixel C](AndroidTabletScreenshot?raw=true "Pixel C")
+![Pixel C](AndroidTabletScreenshot.png?raw=true "Pixel C")
 
