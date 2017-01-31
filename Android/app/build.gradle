@@ -18,7 +18,10 @@ android {
             // This will automatically detect the IP address of the machine building RealmTasks.
             // It is assumed that this machine is also running the Object Server.
             // If not, replace 'host' with the IP of the machine hosting the server.
-            buildConfigField "String", "OBJECT_SERVER_IP", "\"${host}\""
+
+            // buildConfigField "String", "OBJECT_SERVER_IP", "\"${host}\""
+
+            buildConfigField "String", "OBJECT_SERVER_IP", "\"192.168.1.79\""
         }
         release {
             minifyEnabled false
