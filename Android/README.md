@@ -4,7 +4,7 @@ Realm Draw is a simple drawing app designed to show off the collaborative featur
 
 Any number of users may draw on a single shared canvas in any given moment, with contributions from other devices appearing on the canvas in real-time.
 
-This version is the iOS version, as demonstrated in the Realm Mobile Platform demonstration video
+This version is the Android version.
 
 ## Installation Instructions
 
