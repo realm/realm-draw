@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Net;
 using Realms;
 using Realms.Sync;
 using SkiaSharp;
@@ -85,6 +85,8 @@ namespace DrawXShared
         internal Action RefreshOnRealmUpdate { get; set; }
 
         internal Action CredentialsEditor { get; set; }
+
+        internal Action<bool, string> ReportError { get; set; }  // params isError, msg
         #endregion
 
         #region DrawingState
@@ -146,7 +148,7 @@ namespace DrawXShared
 
         private void InitCurrentColor()
         {
-             var currentByName = SwatchColor.ColorsByName [Settings.LastColorUsed];
+            var currentByName = SwatchColor.ColorsByName[Settings.LastColorUsed];
             _currentColorIndex = SwatchColor.Colors.IndexOf(currentByName);
         }
         #endregion Settings
@@ -167,6 +169,7 @@ namespace DrawXShared
             }
 
             _loginIconBitmap = EmbeddedMedia.BitmapNamed("CloudIcon.png");
+            ReportError = (isError, msg) => System.Diagnostics.Debug.WriteLine(msg); // default expect override by apps
         }
 
         internal void InvalidateCachedPaths()
@@ -185,12 +188,46 @@ namespace DrawXShared
             var s = Settings;
             //// TODO allow entering Create User flag on credentials to pass in here instead of false
             var credentials = Credentials.UsernamePassword(s.Username, s.Password, false);
-            var user = await User.LoginAsync(credentials, new Uri($"http://{s.ServerIP}"));
-            Debug.WriteLine($"Got user logged in with refresh token {user.RefreshToken}");
+            User user = null;
+            try
+            {
+                user = await User.LoginAsync(credentials, new Uri($"http://{s.ServerIP}"));
+                Debug.WriteLine($"Got user logged in with refresh token {user.RefreshToken}");
+                var loginConf = new SyncConfiguration(user, new Uri($"realm://{s.ServerIP}/~/Draw"));
+                _realm = Realm.GetInstance(loginConf);
+                SetupPathChangeMonitoring();
+            }
+            catch (Realms.Sync.Exceptions.AuthenticationException)
+            {
+                ReportError(false, $"Unknown Username \n{s.Username} and Password \n{s.Password} combination");
+            }
+            catch (System.Net.Sockets.SocketException sockEx)
+            {
+                ReportError(true, $"Network error: {sockEx}");
+            }
+            catch (WebException webEx)
+            {
+                if (webEx.Status == System.Net.WebExceptionStatus.ConnectFailure)
+                {
+                    ReportError(true, $"Unable to connect to {s.ServerIP} - check address {webEx.Message}");
+                }
+                else
+                {
+                    ReportError(true, $"Error trying to login to {s.ServerIP} with {s.Username}/{s.Password} {webEx.Message}");
+                }
+            }
+            catch (Exception e)
+            {
+                if (user == null)
+                {
+                    ReportError(true, $"Error trying to login to {s.ServerIP} with {s.Username}/{s.Password} {e.GetType().FullName} {e.Message}");
+                }
+                else
+                {
+                    ReportError(true, $"Credentials accepted at {s.ServerIP} but then failed to open Realm: {e.GetType().FullName} {e.Message}");
+                }
+            }
 
-            var loginConf = new SyncConfiguration(user, new Uri($"realm://{s.ServerIP}/~/Draw"));
-            _realm = Realm.GetInstance(loginConf);
-            SetupPathChangeMonitoring();
             _waitingForLogin = false;
         }
 
@@ -260,7 +297,7 @@ namespace DrawXShared
 
         private bool TouchInControlArea(float inX, float inY)
         {
-            if (_loginIconTouchRect.Contains(inX, inY))
+            if (_realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
             {
                 InvalidateCachedPaths();
                 CredentialsEditor.Invoke();  // TODO only invalidate if changed server??
@@ -288,7 +325,7 @@ namespace DrawXShared
         {
             // draw pencils, assigning the fields used for touch detection
             _numPencils = SwatchColor.ColorsByName.Count;
-            if (_currentColorIndex == -1) 
+            if (_currentColorIndex == -1)
             {
                 InitCurrentColor();
             }
@@ -436,13 +473,17 @@ namespace DrawXShared
         public void StartDrawing(float inX, float inY)
         {
             _currentlyDrawing = null;  // don't clear in Stop as will lose last point, clear when we know done
+            _ignoringTouches = false;
+
+            // when not logged in, entire screen acts as control area that will trigger CredentialsEditor
             if (TouchInControlArea(inX, inY))
             {
                 _ignoringTouches = true;
                 return;
             }
 
-            _ignoringTouches = false;
+
+            // check if needs login, eg: if login failed and touch blank screen should cope
             if (_realm == null)
             {
                 if (!_waitingForLogin)
@@ -532,7 +573,7 @@ namespace DrawXShared
                 {
                     _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
                 }
-            
+
                 _drawPath.drawerID = "";  // objc original uses this to detect a "finished" path
             });
         }
@@ -550,7 +591,7 @@ namespace DrawXShared
         public void ErasePaths()
         {
             InvalidateCachedPaths();
-            _realm.Write(() => 
+            _realm.Write(() =>
             {
                 _realm.RemoveAll<DrawPath>();
                 _realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310

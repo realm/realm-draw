@@ -67,10 +67,18 @@ namespace DrawX.IOS
             {
                 InvokeOnMainThread(EditCredentials);
             };
+
             _drawer.RefreshOnRealmUpdate = () =>
             {
                 Debug.WriteLine("Refresh callback triggered by Realm");
                 View?.SetNeedsDisplay();  // just refresh on notification, OnPaintSample below triggers DrawTouches
+            };
+
+            _drawer.ReportError = (bool isError, string msg) =>
+            {
+                var alertController = UIAlertController.Create(isError?"Realm Error":"Warning", msg, UIAlertControllerStyle.Alert);
+                alertController.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
+                PresentViewController(alertController, true, null);
             };
         }
 
@@ -165,7 +173,7 @@ namespace DrawX.IOS
                 {
                     alert.PopoverPresentationController.SourceView = View;
                 }
-                PresentViewController(alert, animated:true, completionHandler:null);
+                PresentViewController(alert, animated: true, completionHandler: null);
                 //// unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
             }
         }
