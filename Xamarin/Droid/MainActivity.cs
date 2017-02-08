@@ -53,11 +53,25 @@ namespace DrawX.Droid
             {
                 EditCredentials();
             };
+
             _drawer.RefreshOnRealmUpdate = () =>
             {
                 System.Diagnostics.Debug.WriteLine("Refresh callback triggered by Realm");
                 _canvas.Invalidate();
             };
+
+            _drawer.ReportError = (bool isError, string msg) =>
+            {
+                AlertDialog.Builder alert = new AlertDialog.Builder (this);
+                alert.SetTitle (isError?"Realm Error":"Warning");
+                alert.SetMessage(msg);
+                alert.SetPositiveButton ("OK", (senderAlert, args) => {
+                } );
+
+                RunOnUiThread (() => {
+                    alert.Show();
+                } );}
+            ;
         }
 
         protected override void OnStart()
