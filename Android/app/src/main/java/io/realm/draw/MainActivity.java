@@ -16,10 +16,13 @@
 
 package io.realm.draw;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -39,7 +42,7 @@ import io.realm.SyncCredentials;
 import io.realm.SyncUser;
 import io.realm.draw.models.DrawPath;
 import io.realm.draw.models.DrawPoint;
-
+import io.realm.draw.sensor.ShakeSensorEventListener;
 
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback, View.OnClickListener {
@@ -59,6 +62,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private PencilView currentPencil;
     private HashMap<String, Integer> nameToColorMap = new HashMap<>();
     private HashMap<Integer, String> colorIdToName = new HashMap<>();
+
+    private SensorManager sensorManager;
+    private Sensor accelerometerSensor;
+    private ShakeSensorEventListener shakeSensorEventListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +92,33 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         generateColorMap();
         bindButtons();
+        initializeShakeSensor();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sensorManager.registerListener(shakeSensorEventListener, accelerometerSensor, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(shakeSensorEventListener);
+    }
+
+    private void initializeShakeSensor() {
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        shakeSensorEventListener = new ShakeSensorEventListener();
+        shakeSensorEventListener.setOnShakeListener(new ShakeSensorEventListener.OnShakeListener() {
+
+            @Override
+            public void onShake(int count) {
+                wipeCanvas();
+            }
+        });
     }
 
     private void bindButtons() {
@@ -135,6 +170,18 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         colorIdToName.put(R.id.melon, "Melon");
     }
 
+    private void wipeCanvas() {
+        if(realm != null) {
+            realm.executeTransactionAsync(new Realm.Transaction() {
+                @Override
+                public void execute(Realm r) {
+                    r.deleteAll();
+                }
+            });
+        }
+    }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -146,6 +193,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        if(realm == null) {
+            return false; // if we are in the middle of a rotation, realm may be null.
+        }
+
         int[] viewLocation = new int[2];
         surfaceView.getLocationInWindow(viewLocation);
         int action = event.getAction();
