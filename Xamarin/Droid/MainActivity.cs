@@ -62,16 +62,18 @@ namespace DrawX.Droid
 
             _drawer.ReportError = (bool isError, string msg) =>
             {
-                AlertDialog.Builder alert = new AlertDialog.Builder (this);
-                alert.SetTitle (isError?"Realm Error":"Warning");
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.SetTitle(isError ? "Realm Error" : "Warning");
                 alert.SetMessage(msg);
-                alert.SetPositiveButton ("OK", (senderAlert, args) => {
-                } );
+                alert.SetPositiveButton("OK", (senderAlert, args) =>
+                {
+                });
 
-                RunOnUiThread (() => {
+                RunOnUiThread(() =>
+                {
                     alert.Show();
-                } );}
-            ;
+                });
+            };
         }
 
         protected override void OnStart()
@@ -105,7 +107,7 @@ namespace DrawX.Droid
             {
                 return;  // in case managed to trigger before focus event finished setup
             }
-            
+
             float fx = touchEventArgs.Event.GetX();
             float fy = touchEventArgs.Event.GetY();
             var needsRefresh = false;

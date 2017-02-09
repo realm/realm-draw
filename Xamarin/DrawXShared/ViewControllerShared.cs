@@ -180,7 +180,6 @@ namespace DrawX.IOS
 
         private void EditCredentials()
         {
-            // TODO generalise this to work in either this or DrawX.iOS project
             var sb = UIStoryboard.FromName("LoginScreen", null);
             var loginVC = sb.InstantiateViewController("Login") as LoginViewController;
             loginVC.OnCloseLogin = (bool changedServer) =>
