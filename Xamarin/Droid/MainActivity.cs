@@ -89,6 +89,11 @@ namespace DrawX.Droid
                 }
             }
 
+            if (DrawXSettingsManager.LoggedInUser != null)
+            {
+                _drawer.LoginToServerAsync(DrawXSettingsManager.LoggedInUser);
+                _hasShownCredentials = true;  // skip credentials if saved user in store
+            }
             if (!_hasShownCredentials)
             {
                 EditCredentials();

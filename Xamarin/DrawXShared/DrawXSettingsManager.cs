@@ -20,6 +20,8 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using Realms;
+using Realms.Exceptions;
+using Realms.Sync;
 
 namespace DrawXShared
 {
@@ -27,6 +29,7 @@ namespace DrawXShared
     {
         private static Realm _localSettingsRealm;
         private static DrawXSettings _savedSettings;
+        internal static User LoggedInUser {get; private set; }  // hides the exception handling of User.Current
 
         public static DrawXSettings Settings
         {
@@ -56,6 +59,15 @@ namespace DrawXShared
             settingsConf.ObjectClasses = new[] { typeof(DrawXSettings) };
             settingsConf.SchemaVersion = 2;  // set explicitly and bump as we add setting properties
             _localSettingsRealm = Realm.GetInstance(settingsConf);
+            try
+            {
+                LoggedInUser = User.Current;
+            }
+            catch (RealmException re)
+            {
+                // do nothing - assume multiple users logged in so will have to use login dialog to choose
+                // TODO - present a Currently Logged in picker in this case?
+            }
         }
 
         // bit of a hack which only works when the caller has objects already on the _realmLocalSettings Realm
@@ -72,9 +84,10 @@ namespace DrawXShared
                 serverIP += ":9080";
             }
 
-            // crashes if ServerIP is null            bool changedServer = string.IsNullOrEmpty(_savedSettings.ServerIP) || !_savedSettings.ServerIP.Equals(serverIP);
             var changedServer = _savedSettings.ServerIP == null ||
-                                 !_savedSettings.ServerIP.Equals(serverIP);
+              !_savedSettings.ServerIP.Equals(serverIP) ||
+              !_savedSettings.Username.Equals(username) ||
+              !_savedSettings.Password.Equals(password);
             _localSettingsRealm.Write(() =>
             {
                 _savedSettings.ServerIP = serverIP;

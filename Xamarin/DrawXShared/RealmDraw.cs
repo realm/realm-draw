@@ -21,8 +21,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using Realms;
+using Realms.Exceptions;
 using Realms.Sync;
+using Realms.Sync.Exceptions;
 using SkiaSharp;
 
 namespace DrawXShared
@@ -35,7 +38,8 @@ namespace DrawXShared
 
     Login
     -----
-    Credentials come from DrawXSettings.
+    We first try the Realm built-in crediential sture in User.Current.
+    Otherwise, credentials come from DrawXSettings, which remembers our last choice of server and username/password, as well as other settings.
     It is the responsibility of external GUI classes to get credentials entered and delay
     starting RealmDraw until connection is made.
 
@@ -179,25 +183,42 @@ namespace DrawXShared
             _currentlyDrawing = null;
         }
 
-        internal async void LoginToServerAsync()
+        internal async void LoginToServerAsync(User user = null)
         {
             // in case have lingering subscriptions, clear by clearing the results to which we subscribe
             _allPaths = null;
 
             _waitingForLogin = true;
-            var s = Settings;
-            //// TODO allow entering Create User flag on credentials to pass in here instead of false
-            var credentials = Credentials.UsernamePassword(s.Username, s.Password, false);
-            User user = null;
+
+            // assuming we are calling Login again after being logged in already, which has been guarded
+            // to see that there IS a change in server/user, we need to logout
             try
             {
-                user = await User.LoginAsync(credentials, new Uri($"http://{s.ServerIP}"));
-                Debug.WriteLine($"Got user logged in with refresh token {user.RefreshToken}");
+                foreach(var activeUser in User.AllLoggedIn)
+                {
+                    activeUser.LogOut();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Unexpected exception getting User.AllLoggedIn {e}");
+            }
+
+            var s = Settings;
+            //// TODO allow entering Create User flag on credentials to pass in here instead of false
+            Credentials credentials = user == null ? Credentials.UsernamePassword(s.Username, s.Password, false) : null;
+            try
+            {
+                if (user == null)
+                {
+                    user = await User.LoginAsync(credentials, new Uri($"http://{s.ServerIP}"));
+                    Debug.WriteLine($"Got user logged in with refresh token {user.RefreshToken}");
+                }
                 var loginConf = new SyncConfiguration(user, new Uri($"realm://{s.ServerIP}/~/Draw"));
                 _realm = Realm.GetInstance(loginConf);
                 SetupPathChangeMonitoring();
             }
-            catch (Realms.Sync.Exceptions.AuthenticationException)
+            catch (AuthenticationException)
             {
                 ReportError(false, $"Unknown Username \n{s.Username} and Password \n{s.Password} combination");
             }
@@ -245,7 +266,6 @@ namespace DrawXShared
                 //// we assume if at least one path deleted, drastic stuff happened, probably erase all
                 if (_allPaths.Count() == 0 || changes.DeletedIndices.Length > 0)
                 {
-                    Debug.WriteLine($"Realm notifier: Invalidating on Realm change as some or all paths deleted or initially blank");
                     InvalidateCachedPaths();  // someone erased their tablet
                     RefreshOnRealmUpdate();
                     return;
@@ -253,12 +273,10 @@ namespace DrawXShared
 
                 var numInserted = changes.InsertedIndices.Length;
                 var numChanged = changes.ModifiedIndices.Length;
-                Debug.WriteLine($"Realm notifier: {numInserted} inserts, {numChanged} changes");
                 if ((numInserted == 0 && numChanged == 1 && _allPaths.ElementAt(changes.ModifiedIndices[0]) == _drawPath) ||
                     (numInserted == 1 && numChanged == 0 && _allPaths.ElementAt(changes.InsertedIndices[0]) == _drawPath))
                 {
                     // current path is drawn by immediate action, not by a callback
-                    Debug.WriteLine("Realm notifier: no action because is just current path");
                     return;
                 }
 
@@ -269,13 +287,11 @@ namespace DrawXShared
 
                 foreach (var index in changes.InsertedIndices)
                 {
-                    Debug.WriteLine($"Realm notifier: caching path object inserted at {index}");
                     _pathsToDraw.Add(_allPaths.ElementAt(index));
                 }
 
                 foreach (var index in changes.ModifiedIndices)
                 {
-                    Debug.WriteLine($"Realm notifier: caching object modified at {index}");
                     _pathsToDraw.Add(_allPaths.ElementAt(index));
                 }
 
@@ -422,7 +438,6 @@ namespace DrawXShared
 
             if (_hasSavedBitmap)
             {
-                Debug.WriteLine($"DrawTouches - blitting saved canvas");
                 canvas.RestoreToCount(_canvasSaveCount);  // use up the offscreen bitmap regardless
             }
 
@@ -431,7 +446,6 @@ namespace DrawXShared
                 InitPaint(paint);
                 if (_redrawPathsAtNextDraw)
                 {
-                    Debug.WriteLine($"DrawTouches - Redrawing all paths");
                     canvas.Clear(SKColors.White);
                     DrawPencils(canvas, paint);
                     DrawLoginIcon(canvas, paint);
@@ -447,10 +461,8 @@ namespace DrawXShared
                     // current paths being drawn, by other devices
                     if (_pathsToDraw != null)
                     {
-                        Debug.WriteLine($"DrawTouches - drawing remote paths in progress");
                         foreach (var drawPath in _pathsToDraw)
                         {
-                            Debug.WriteLine($"DrawTouches - drawing path from Realm starting at {drawPath.points[0]}");
                             DrawAPath(canvas, paint, drawPath);
                         }
                     }
@@ -458,7 +470,6 @@ namespace DrawXShared
 
                 if (_currentlyDrawing != null)
                 {
-                    Debug.WriteLine($"DrawTouches - drawing current in-memory path");
                     paint.Color = CurrentColor.Color;
                     canvas.DrawPath(_currentlyDrawing, paint);
                 }
@@ -496,7 +507,6 @@ namespace DrawXShared
 
             _lastX = inX;
             _lastY = inY;
-            Debug.WriteLine($"Writing a new path starting at {inX}, {inY}");
 
             // start a local path for responsive drawing
             _currentlyDrawing = new SKPath();
@@ -533,7 +543,6 @@ namespace DrawXShared
 
             _lastX = inX;
             _lastY = inY;
-            Debug.WriteLine($"Adding a point at {inX}, {inY}");
             _currentlyDrawing.LineTo(inX, inY);
 
             ScalePointsToStore(ref inX, ref inY);
@@ -565,7 +574,6 @@ namespace DrawXShared
                 _currentlyDrawing.LineTo(inX, inY);
             }
 
-            Debug.WriteLine($"Ending a path at {inX}, {inY}");
             ScalePointsToStore(ref inX, ref inY);
             _realm.Write(() =>
             {
