@@ -277,7 +277,7 @@ namespace DrawXShared
             if (Realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
             {
                 InvalidateCachedPaths();
-                DrawXSettingsManager.CurrentUser?.LogOut();
+                User.Current?.LogOut();
                 CredentialsEditor();  // TODO only invalidate if changed server??
                 return true;
             }

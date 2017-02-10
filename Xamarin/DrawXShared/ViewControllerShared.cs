@@ -45,7 +45,7 @@ namespace DrawX.IOS
             base.ViewDidLoad();
 
             DrawXSettingsManager.InitLocalSettings();
-            var user = DrawXSettingsManager.CurrentUser;
+            var user = User.Current;
             if (user != null)
             {
                 SetupDrawer(() => Task.FromResult(user));
@@ -85,7 +85,7 @@ namespace DrawX.IOS
         {
             base.ViewDidLayoutSubviews();
 
-            var user = DrawXSettingsManager.CurrentUser;
+            var user = User.Current;
             if (View.Bounds != _prevBounds && user != null)
             {
                 await SetupDrawer(() => Task.FromResult(user));

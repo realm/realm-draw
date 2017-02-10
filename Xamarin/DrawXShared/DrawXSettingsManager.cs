@@ -19,7 +19,6 @@
 using System;
 using System.Linq;
 using Realms;
-using Realms.Sync;
 
 namespace DrawXShared
 {
@@ -52,28 +51,7 @@ namespace DrawXShared
             }
         }
 
-        public static User CurrentUser
-        {
-            get
-            {
-                try
-                {
-                    return User.Current;
-                }
-                catch
-                {
-                    // We have ended up with more than one logged in user. Log all of them out.
-                    foreach (var user in User.AllLoggedIn)
-                    {
-                        user.LogOut();
-                    }
-
-                    return null;
-                }
-            }
-        }
-
-        internal static void InitLocalSettings()
+        public static void InitLocalSettings()
         {
             var settingsConf = new RealmConfiguration("DrawXsettings.realm");
             settingsConf.ObjectClasses = new[] { typeof(DrawXSettings) };
@@ -82,7 +60,7 @@ namespace DrawXShared
         }
 
         // bit of a hack which only works when the caller has objects already on the _realmLocalSettings Realm
-        internal static void Write(Action writer)
+        public static void Write(Action writer)
         {
             _localSettingsRealm.Write(writer);
         }

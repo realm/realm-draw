@@ -86,7 +86,7 @@ namespace DrawX.Droid
         {
             _canvas.ViewTreeObserver.GlobalLayout -= OnViewRendered;
 
-            var user = DrawXSettingsManager.CurrentUser;
+            var user = User.Current;
             if (user != null)
             {
                 await SetupDrawer(() => Task.FromResult(user));
