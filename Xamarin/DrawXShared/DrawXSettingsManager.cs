@@ -17,11 +17,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Realms;
-using Realms.Exceptions;
-using Realms.Sync;
 
 namespace DrawXShared
 {
@@ -29,23 +26,6 @@ namespace DrawXShared
     {
         private static Realm _localSettingsRealm;
         private static DrawXSettings _savedSettings;
-        internal static User LoggedInUser
-        {
-            get
-            {
-                // hides the exception handling of User.Current
-                try
-                {
-                    return User.Current;
-                }
-                catch (RealmException re)
-                {
-                    // do nothing - assume multiple users logged in so will have to use login dialog to choose
-                    // TODO - present a Currently Logged in picker in this case?
-                    return null;
-                }
-            }
-        }
 
         public static DrawXSettings Settings
         {

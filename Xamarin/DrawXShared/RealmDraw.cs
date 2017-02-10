@@ -18,14 +18,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Realms;
-using Realms.Exceptions;
 using Realms.Sync;
 using Realms.Sync.Exceptions;
 using SkiaSharp;
@@ -98,17 +95,17 @@ namespace DrawXShared
         #endregion
 
         #region DrawingState
-        private bool _isDrawing = false;
-        private bool _ignoringTouches = false;
+        private bool _isDrawing;
+        private bool _ignoringTouches;
         private DrawPath _drawPath;
         private SKPath _currentlyDrawing;  // caches for responsive drawing on this device
         private float _canvasWidth, _canvasHeight;
-        private IList<DrawPath> _pathsToDraw = null;  // set in notification callback
+        private IList<DrawPath> _pathsToDraw;  // set in notification callback
         #endregion
 
         #region CachedCanvas
         private int _canvasSaveCount;  // from SaveLayer
-        private bool _hasSavedBitmap = false;  // separate flag so we don't rely on any given value in _canvasSaveCount
+        private bool _hasSavedBitmap;  // separate flag so we don't rely on any given value in _canvasSaveCount
         private bool _redrawPathsAtNextDraw = true;
         #endregion
 
@@ -184,13 +181,35 @@ namespace DrawXShared
             _currentlyDrawing = null;
         }
 
-        internal void CreateSynchronizedRealm(User user)
+        internal async Task<bool> LoginUserAsync(Func<Task<User>> userFunc)
         {
-            // in case have lingering subscriptions, clear by clearing the results to which we subscribe
-            _allPaths = null;
-            var loginConf = new SyncConfiguration(user, new Uri($"realm://{Settings.ServerIP}/~/Draw"));
-            Realm = Realm.GetInstance(loginConf);
-            SetupPathChangeMonitoring();
+            try
+            {
+                var user = await userFunc();
+                // in case have lingering subscriptions, clear by clearing the results to which we subscribe
+                _allPaths = null;
+                var loginConf = new SyncConfiguration(user, new Uri($"realm://{Settings.ServerIP}/~/Draw"));
+                Realm = Realm.GetInstance(loginConf);
+                SetupPathChangeMonitoring();
+                return true;
+            }
+            catch (AuthenticationException)
+            {
+                ReportError(false, $"Unknown Username and Password combination");
+            }
+            catch (SocketException sockEx)
+            {
+                ReportError(true, $"Network error: {sockEx.Message}");
+            }
+            catch (WebException webEx) when (webEx.Status == WebExceptionStatus.ConnectFailure)
+            {
+                ReportError(true, $"Unable to connect to {Settings.ServerIP} - check address {webEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                ReportError(true, $"Error trying to login to {Settings.ServerIP}: {ex.Message}");
+            }
+            return false;
         }
 
         private void SetupPathChangeMonitoring()
@@ -254,7 +273,7 @@ namespace DrawXShared
 
         private bool TouchInControlArea(float inX, float inY)
         {
-            if (_realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
+            if (Realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
             {
                 InvalidateCachedPaths();
                 User.Current?.LogOut();

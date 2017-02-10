@@ -17,11 +17,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Diagnostics;
-using System.Threading;
+using System.Threading.Tasks;
 using DrawXShared;
 using Foundation;
 using Realms.Sync;
+using Realms.Sync.Exceptions;
 using SkiaSharp.Views.iOS;
 using UIKit;
 
@@ -49,12 +49,11 @@ namespace DrawX.IOS
             var user = User.Current;
             if (user != null)
             {
-                SetupDrawer();
-                _drawer.CreateSynchronizedRealm(user);
+                SetupDrawer(() => Task.FromResult(user));
             }
         }
 
-        private void SetupDrawer()
+        private Task<bool> SetupDrawer(Func<Task<User>> getUserFunc)
         {
             // scale bounds to match the pixel dimensions of the SkiaSurface
             _drawer = new RealmDraw(
@@ -73,13 +72,15 @@ namespace DrawX.IOS
 
             _drawer.ReportError = (bool isError, string msg) =>
             {
-                var alertController = UIAlertController.Create(isError?"Realm Error":"Warning", msg, UIAlertControllerStyle.Alert);
+                var alertController = UIAlertController.Create(isError ? "Realm Error" : "Warning", msg, UIAlertControllerStyle.Alert);
                 alertController.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
                 PresentViewController(alertController, true, null);
             };
+
+            return _drawer.LoginUserAsync(getUserFunc);
         }
 
-        public override void ViewDidLayoutSubviews()
+        public async override void ViewDidLayoutSubviews()
         {
             base.ViewDidLayoutSubviews();
 
@@ -89,14 +90,15 @@ namespace DrawX.IOS
             {
                 if (View.Bounds != _prevBounds)
                 {
-                    SetupDrawer();
-                    var user = DrawXSettingsManager.LoggedInUser;
-                    if (user != null)
+                    var success = await SetupDrawer(() => Task.FromResult(User.Current));
+                    if (!success)
                     {
-                        _drawer.LoginToServerAsync(user);
-                        _hasShownCredentials = true;  // skip credentials if saved user in store
+                        EditCredentials();
                     }
-                    View?.SetNeedsDisplay();
+                    else
+                    {
+                        View?.SetNeedsDisplay();
+                    }
                 }
             }
             else
@@ -184,15 +186,13 @@ namespace DrawX.IOS
             var loginVC = sb.InstantiateViewController("Login") as LoginViewController;
             loginVC.PerformLoginAsync = async (credentials) =>
             {
-                if (credentials != null)
-                {
-                    var user = await User.LoginAsync(credentials, new Uri($"http://{DrawXSettingsManager.Settings.ServerIP}"));
-                    SetupDrawer();
-                    _drawer.CreateSynchronizedRealm(user);
-                }
+                var success = await SetupDrawer(() => User.LoginAsync(credentials, new Uri($"http://{DrawXSettingsManager.Settings.ServerIP}")));
 
-                loginVC.DismissViewController(true, null);
-                View.SetNeedsDisplay();
+                if (success)
+                {
+                    loginVC.DismissViewController(true, null);
+                    View.SetNeedsDisplay();
+                }
             };
 
             PresentViewController(loginVC, false, null);
