@@ -159,7 +159,6 @@ namespace DrawXShared
 
         public RealmDraw(float inWidth, float inHeight)
         {
-            // TODO close the Realm
             _canvasWidth = inWidth;
             _canvasHeight = inHeight;
 
@@ -247,6 +246,13 @@ namespace DrawXShared
                 {
                     ReportError(true, $"Credentials accepted at {s.ServerIP} but then failed to open Realm: {e.GetType().FullName} {e.Message}");
                 }
+            }
+
+            if (user != null)
+            {
+                // cleanup the graphics
+                InvalidateCachedPaths();
+                RefreshOnRealmUpdate();
             }
 
             _waitingForLogin = false;

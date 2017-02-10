@@ -68,7 +68,16 @@ namespace DrawX.Droid
             {
                 ((AlertDialog)sender).Dismiss();
             });
-            return builder.Create();
+            var dialog = builder.Create();
+
+            // you can only cancel logging in if already logged in, otherwise it is meaningless
+            if (DrawXSettingsManager.LoggedInUser == null)
+            {
+                dialog.Show();  // instantiates so buttons can be accessed
+                var negativeButton = dialog.GetButton((int)DialogButtonType.Negative);
+                negativeButton.Enabled = false;
+            }
+            return dialog;
         }
     }
 }

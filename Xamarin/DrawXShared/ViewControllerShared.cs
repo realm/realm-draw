@@ -92,9 +92,10 @@ namespace DrawX.IOS
                 if (View.Bounds != _prevBounds)
                 {
                     SetupDrawer();
-                    if (DrawXSettingsManager.LoggedInUser != null)
+                    var user = DrawXSettingsManager.LoggedInUser;
+                    if (user != null)
                     {
-                        _drawer.LoginToServerAsync(DrawXSettingsManager.LoggedInUser);
+                        _drawer.LoginToServerAsync(user);
                         _hasShownCredentials = true;  // skip credentials if saved user in store
                     }
                     View?.SetNeedsDisplay();

@@ -29,7 +29,23 @@ namespace DrawXShared
     {
         private static Realm _localSettingsRealm;
         private static DrawXSettings _savedSettings;
-        internal static User LoggedInUser {get; private set; }  // hides the exception handling of User.Current
+        internal static User LoggedInUser
+        {
+            get
+            {
+                // hides the exception handling of User.Current
+                try
+                {
+                    return User.Current;
+                }
+                catch (RealmException re)
+                {
+                    // do nothing - assume multiple users logged in so will have to use login dialog to choose
+                    // TODO - present a Currently Logged in picker in this case?
+                    return null;
+                }
+            }
+        }
 
         public static DrawXSettings Settings
         {
@@ -59,15 +75,6 @@ namespace DrawXShared
             settingsConf.ObjectClasses = new[] { typeof(DrawXSettings) };
             settingsConf.SchemaVersion = 2;  // set explicitly and bump as we add setting properties
             _localSettingsRealm = Realm.GetInstance(settingsConf);
-            try
-            {
-                LoggedInUser = User.Current;
-            }
-            catch (RealmException re)
-            {
-                // do nothing - assume multiple users logged in so will have to use login dialog to choose
-                // TODO - present a Currently Logged in picker in this case?
-            }
         }
 
         // bit of a hack which only works when the caller has objects already on the _realmLocalSettings Realm
