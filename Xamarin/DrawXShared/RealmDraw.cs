@@ -398,15 +398,15 @@ namespace DrawXShared
             using (var path = new SKPath())
             {
                 // nasty hack because the Cocoa version defaults to Black
-                var pathColorName = (drawPath.color == "Black") ? "Charcoal" : drawPath.color;
+                var pathColorName = (drawPath.Color == "Black") ? "Charcoal" : drawPath.Color;
                 var pathColor = SwatchColor.ColorsByName[pathColorName].Color;
                 paint.Color = pathColor;
                 var isFirst = true;
-                foreach (var point in drawPath.points)
+                foreach (var point in drawPath.Points)
                 {
                     // for compatibility with iOS Realm, stores floats, normalised to NORMALISE_TO
-                    var fx = (float)point.x;
-                    var fy = (float)point.y;
+                    var fx = (float)point.X;
+                    var fy = (float)point.Y;
                     ScalePointsToDraw(ref fx, ref fy);
                     if (isFirst)
                     {
@@ -522,8 +522,8 @@ namespace DrawXShared
             _isDrawing = true;
             _realm.Write(() =>
             {
-                _drawPath = new DrawPath { color = CurrentColor.Name };  // Realm saves name of color
-                _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
+                _drawPath = new DrawPath { Color = CurrentColor.Name };  // Realm saves name of color
+                _drawPath.Points.Add(new DrawPoint { X = inX, Y = inY });
                 _realm.Add(_drawPath);
             });
         }
@@ -554,7 +554,7 @@ namespace DrawXShared
             ScalePointsToStore(ref inX, ref inY);
             _realm.Write(() =>
             {
-                _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
+                _drawPath.Points.Add(new DrawPoint { X = inX, Y = inY });
             });
         }
 
@@ -585,10 +585,9 @@ namespace DrawXShared
             {
                 if (movedWhilstStopping)
                 {
-                    _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
+                    _drawPath.Points.Add(new DrawPoint { X = inX, Y = inY });
                 }
-
-                _drawPath.drawerID = "";  // objc original uses this to detect a "finished" path
+                _drawPath.DrawerId = "";  // objc original uses this to detect a "finished" path
             });
         }
 

@@ -17,22 +17,19 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Realms;
-using SkiaSharp;
 
 namespace DrawXShared
 {
-    [SuppressMessage(
-        "Microsoft.StyleCop.CSharp.NamingRules",
-        "SA1300:ElementMustBeginWithUpperCaseLetter", 
-        Justification = "Conform to same schema as other Realm samples")]
     public class DrawPath : RealmObject
     {
-        public string drawerID { get; set; }
+		[MapTo("drawerID")]
+        public string DrawerId { get; set; }
 
-        public string color { get; set; }
+		[MapTo("color")]
+        public string Color { get; set; }
 
-        public IList<DrawPoint> points { get; }
+		[MapTo("points")]
+        public IList<DrawPoint> Points { get; }
     }
 }
