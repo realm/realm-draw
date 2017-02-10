@@ -119,16 +119,18 @@
       <HintPath>..\packages\Remotion.Linq.2.1.1\lib\portable-net45+win+wpa81+wp80\Remotion.Linq.dll</HintPath>
     </Reference>
     <Reference Include="SkiaSharp">
-      <HintPath>..\packages\SkiaSharp.1.55.1\lib\XamariniOS\SkiaSharp.dll</HintPath>
+      <HintPath>..\packages\SkiaSharp.1.56.0\lib\XamariniOS\SkiaSharp.dll</HintPath>
     </Reference>
     <Reference Include="SkiaSharp.Views.iOS">
-      <HintPath>..\packages\SkiaSharp.Views.1.55.1\lib\XamariniOS\SkiaSharp.Views.iOS.dll</HintPath>
+      <HintPath>..\packages\SkiaSharp.Views.1.56.0\lib\XamariniOS\SkiaSharp.Views.iOS.dll</HintPath>
     </Reference>
     <Reference Include="Realm">
-      <HintPath>..\packages\Realm.Database.0.81.0\lib\Xamarin.iOS10\Realm.dll</HintPath>
+      <HintPath>..\packages\Realm.Database.1.0.3\lib\Xamarin.iOS10\Realm.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Realm.Sync">
-      <HintPath>..\packages\Realm.0.81.0\lib\Xamarin.iOS10\Realm.Sync.dll</HintPath>
+      <HintPath>..\packages\Realm.1.0.3\lib\Xamarin.iOS10\Realm.Sync.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -175,4 +177,6 @@
   <Import Project="..\packages\Fody.1.29.4\build\dotnet\Fody.targets" Condition="Exists('..\packages\Fody.1.29.4\build\dotnet\Fody.targets')" />
   <Import Project="..\packages\Realm.Database.0.81.0\build\Realm.Database.targets" Condition="Exists('..\packages\Realm.Database.0.81.0\build\Realm.Database.targets')" />
   <Import Project="..\packages\Realm.0.81.0\build\Realm.targets" Condition="Exists('..\packages\Realm.0.81.0\build\Realm.targets')" />
+  <Import Project="..\packages\Realm.Database.1.0.3\build\Realm.Database.targets" Condition="Exists('..\packages\Realm.Database.1.0.3\build\Realm.Database.targets')" />
+  <Import Project="..\packages\Realm.1.0.3\build\Realm.targets" Condition="Exists('..\packages\Realm.1.0.3\build\Realm.targets')" />
 </Project>

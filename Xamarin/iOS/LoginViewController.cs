@@ -36,7 +36,6 @@ namespace DrawX.IOS
         private void DoLogin()
         {
             bool changedServer = DrawXSettingsManager.UpdateCredentials(ServerEntry.Text, UsernameEntry.Text, PasswordEntry.Text);
-            //// TODO handle failure to login
             OnCloseLogin(changedServer);
         }
 
@@ -53,11 +52,15 @@ namespace DrawX.IOS
                 DoLogin();
             };
 
+            // you can only cancel logging in if already logged in, otherwise it is meaningless
+            CancelButton.Enabled = (DrawXSettingsManager.LoggedInUser != null);
+                
             CancelButton.TouchUpInside += (sender, e) =>
             {
                 OnCloseLogin(false);
             };
 
+            #region Return key behaviour on keyboard - Next unti last field then Go
             ServerEntry.ShouldReturn += (textField) =>
             {
                 UsernameEntry.BecomeFirstResponder();
@@ -70,13 +73,13 @@ namespace DrawX.IOS
                 return false;
             };
 
-
             PasswordEntry.ShouldReturn += (textField) =>
             {
                 ((UITextField)textField).ResignFirstResponder();
                 DoLogin();
                 return false;
             };
+            #endregion
         }
 
     }

@@ -53,10 +53,26 @@ namespace DrawX.Droid
             {
                 EditCredentials();
             };
+
             _drawer.RefreshOnRealmUpdate = () =>
             {
                 System.Diagnostics.Debug.WriteLine("Refresh callback triggered by Realm");
                 _canvas.Invalidate();
+            };
+
+            _drawer.ReportError = (bool isError, string msg) =>
+            {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.SetTitle(isError ? "Realm Error" : "Warning");
+                alert.SetMessage(msg);
+                alert.SetPositiveButton("OK", (senderAlert, args) =>
+                {
+                });
+
+                RunOnUiThread(() =>
+                {
+                    alert.Show();
+                });
             };
         }
 
@@ -73,6 +89,11 @@ namespace DrawX.Droid
                 }
             }
 
+            if (DrawXSettingsManager.LoggedInUser != null)
+            {
+                _drawer.LoginToServerAsync(DrawXSettingsManager.LoggedInUser);
+                _hasShownCredentials = true;  // skip credentials if saved user in store
+            }
             if (!_hasShownCredentials)
             {
                 EditCredentials();
@@ -91,7 +112,7 @@ namespace DrawX.Droid
             {
                 return;  // in case managed to trigger before focus event finished setup
             }
-            
+
             float fx = touchEventArgs.Event.GetX();
             float fy = touchEventArgs.Event.GetY();
             var needsRefresh = false;

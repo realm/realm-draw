@@ -43,11 +43,11 @@ namespace DrawX.IOS
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            Debug.WriteLine($"Opened view with bounds {View.Bounds.Size}");
 
             // relies on override to point its canvas at our OnPaintSample
             // see ViewDidLayoutSubviews for triggering EditCredentials
             DrawXSettingsManager.InitLocalSettings();
+
             if (DrawXSettingsManager.HasCredentials())
             {
                 // assume we can login and be able to draw
@@ -67,10 +67,17 @@ namespace DrawX.IOS
             {
                 InvokeOnMainThread(EditCredentials);
             };
+
             _drawer.RefreshOnRealmUpdate = () =>
             {
-                Debug.WriteLine("Refresh callback triggered by Realm");
                 View?.SetNeedsDisplay();  // just refresh on notification, OnPaintSample below triggers DrawTouches
+            };
+
+            _drawer.ReportError = (bool isError, string msg) =>
+            {
+                var alertController = UIAlertController.Create(isError?"Realm Error":"Warning", msg, UIAlertControllerStyle.Alert);
+                alertController.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
+                PresentViewController(alertController, true, null);
             };
         }
 
@@ -85,6 +92,12 @@ namespace DrawX.IOS
                 if (View.Bounds != _prevBounds)
                 {
                     SetupDrawer();
+                    var user = DrawXSettingsManager.LoggedInUser;
+                    if (user != null)
+                    {
+                        _drawer.LoginToServerAsync(user);
+                        _hasShownCredentials = true;  // skip credentials if saved user in store
+                    }
                     View?.SetNeedsDisplay();
                 }
             }
@@ -108,9 +121,7 @@ namespace DrawX.IOS
             {
                 var point = touch.LocationInView(View);
                 _drawer?.StartDrawing((float)point.X * _devicePixelMul, (float)point.Y * _devicePixelMul);
-                Debug.WriteLine("TouchesBegan before SetNeedsDisplay");
                 View.SetNeedsDisplay();  // probably after touching Pencils
-                Debug.WriteLine("TouchesBegan afer SetNeedsDisplay");
             }
         }
 
@@ -122,9 +133,7 @@ namespace DrawX.IOS
             {
                 var point = touch.LocationInView(View);
                 _drawer?.AddPoint((float)point.X * _devicePixelMul, (float)point.Y * _devicePixelMul);
-                Debug.WriteLine("TouchesMoved returned from AddPoint, about to SetNeedsDisplay.");
                 View.SetNeedsDisplay();
-                Debug.WriteLine("TouchesMoved after SetNeedsDisplay.");
             }
         }
 
@@ -151,6 +160,7 @@ namespace DrawX.IOS
             View.SetNeedsDisplay();
         }
 
+        // Erase on Shake
         public override void MotionBegan(UIEventSubtype eType, UIEvent evt)
         {
             if (eType == UIEventSubtype.MotionShake)
@@ -165,14 +175,14 @@ namespace DrawX.IOS
                 {
                     alert.PopoverPresentationController.SourceView = View;
                 }
-                PresentViewController(alert, animated:true, completionHandler:null);
+                PresentViewController(alert, animated: true, completionHandler: null);
                 //// unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
             }
         }
 
+        // invoked as callback from pressing a control area in drawing surface, or at startup
         private void EditCredentials()
         {
-            // TODO generalise this to work in either this or DrawX.iOS project
             var sb = UIStoryboard.FromName("LoginScreen", null);
             var loginVC = sb.InstantiateViewController("Login") as LoginViewController;
             loginVC.OnCloseLogin = (bool changedServer) =>
