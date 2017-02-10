@@ -17,30 +17,29 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using DrawXShared;
+using Realms.Sync;
 
 namespace DrawX.Droid
 {
-    public class LoginDialog : DialogFragment
+    public class LoginDialog : DialogFragment, Android.Views.View.IOnClickListener
     {
-        public Action<bool> OnCloseLogin { get; set; }  // caller should set so can use to dismiss
+        private EditText serverAddressEntry;
+        private EditText usernameEntry;
+        private EditText passwordEntry;
+
+        public Func<Credentials, Task> PerformLoginAsync { get; set; }
 
         public override Dialog OnCreateDialog(Bundle savedInstanceState)
         {
             OnCreate(savedInstanceState);
 
-            // equivalent of an Activity's SetContentView
-            var builder = new AlertDialog.Builder(Activity);
             var inflator = Activity.LayoutInflater;
             var dialogView = inflator.Inflate(Resource.Layout.LoginLayout, null);
 
@@ -49,35 +48,47 @@ namespace DrawX.Droid
                 return null;
             }
 
-            var serverAddress = dialogView.FindViewById<EditText>(Resource.Id.serverIPEntry);
-            var username = dialogView.FindViewById<EditText>(Resource.Id.usernameEntry);
-            var password = dialogView.FindViewById<EditText>(Resource.Id.passwordEntry);
-            var s = DrawXSettingsManager.Settings;
-            serverAddress.Text = s.ServerIP;
-            username.Text = s.Username;
-            password.Text = s.Password;
+            serverAddressEntry = dialogView.FindViewById<EditText>(Resource.Id.serverIPEntry);
+            usernameEntry = dialogView.FindViewById<EditText>(Resource.Id.usernameEntry);
+            passwordEntry = dialogView.FindViewById<EditText>(Resource.Id.passwordEntry);
+            serverAddressEntry.Text = DrawXSettingsManager.Settings.ServerIP;
+            usernameEntry.Text = DrawXSettingsManager.Settings.Username;
 
-            builder.SetView(dialogView);
-            builder.SetPositiveButton("Login", (sender, e) =>
-            {
-                bool changedServer = DrawXSettingsManager.UpdateCredentials(serverAddress.Text, username.Text, password.Text);
-                ((AlertDialog)sender).Dismiss();
-                OnCloseLogin(changedServer);
-            });
-            builder.SetNegativeButton("Cancel", (sender, e) =>
-            {
-                ((AlertDialog)sender).Dismiss();
-            });
-            var dialog = builder.Create();
+            return new AlertDialog.Builder(Activity)
+                                  .SetView(dialogView)
+                                  .SetPositiveButton("Login", (IDialogInterfaceOnClickListener)null)
+                                  .Create();
+        }
 
-            // you can only cancel logging in if already logged in, otherwise it is meaningless
-            if (DrawXSettingsManager.LoggedInUser == null)
+        public override void OnStart()
+        {
+            base.OnStart();
+
+            var alert = (AlertDialog)Dialog;
+            var button = alert.GetButton((int)DialogButtonType.Positive);
+            button.SetOnClickListener(this);
+        }
+
+        public async void OnClick(View v)
+        {
+            v.Enabled = false;
+
+            try
             {
-                dialog.Show();  // instantiates so buttons can be accessed
-                var negativeButton = dialog.GetButton((int)DialogButtonType.Negative);
-                negativeButton.Enabled = false;
+                DrawXSettingsManager.Write(() =>
+                {
+                    DrawXSettingsManager.Settings.ServerIP = serverAddressEntry.Text;
+                    DrawXSettingsManager.Settings.Username = usernameEntry.Text;
+                });
+
+                var credentials = Credentials.UsernamePassword(usernameEntry.Text, passwordEntry.Text, false);
+
+                await PerformLoginAsync(credentials);
             }
-            return dialog;
+            finally
+            {
+                v.Enabled = true;
+            }
         }
     }
 }

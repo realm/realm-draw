@@ -19,6 +19,7 @@
 using System;
 using System.Linq;
 using Realms;
+using Realms.Sync;
 
 namespace DrawXShared
 {
@@ -48,6 +49,27 @@ namespace DrawXShared
                 }
 
                 return _savedSettings;
+            }
+        }
+
+        public static User CurrentUser
+        {
+            get
+            {
+                try
+                {
+                    return User.Current;
+                }
+                catch
+                {
+                    // We have ended up with more than one logged in user. Log all of them out.
+                    foreach (var user in User.AllLoggedIn)
+                    {
+                        user.LogOut();
+                    }
+
+                    return null;
+                }
             }
         }
 

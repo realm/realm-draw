@@ -32,7 +32,6 @@ namespace DrawX.IOS
     public class ViewControllerShared : UIViewController
     {
         private RealmDraw _drawer;
-        private bool _hasShownCredentials;  // flag to show on initial layout only
         private CoreGraphics.CGRect _prevBounds;
         private float _devicePixelMul;  // usually 2.0 except on weird iPhone 6+
 
@@ -46,7 +45,7 @@ namespace DrawX.IOS
             base.ViewDidLoad();
 
             DrawXSettingsManager.InitLocalSettings();
-            var user = User.Current;
+            var user = DrawXSettingsManager.CurrentUser;
             if (user != null)
             {
                 SetupDrawer(() => Task.FromResult(user));
@@ -72,9 +71,11 @@ namespace DrawX.IOS
 
             _drawer.ReportError = (bool isError, string msg) =>
             {
+                var tcs = new TaskCompletionSource<object>();
                 var alertController = UIAlertController.Create(isError ? "Realm Error" : "Warning", msg, UIAlertControllerStyle.Alert);
-                alertController.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
-                PresentViewController(alertController, true, null);
+                alertController.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, _ => tcs.TrySetResult(null)));
+                (PresentedViewController ?? this).PresentViewController(alertController, true, null);
+                return tcs.Task;
             };
 
             return _drawer.LoginUserAsync(getUserFunc);
@@ -84,27 +85,21 @@ namespace DrawX.IOS
         {
             base.ViewDidLayoutSubviews();
 
-            // this is the earliest we can show the modal login
-            // show unconditionally on launch
-            if (_drawer?.Realm != null || _hasShownCredentials)
+            var user = DrawXSettingsManager.CurrentUser;
+            if (View.Bounds != _prevBounds && user != null)
             {
-                if (View.Bounds != _prevBounds)
-                {
-                    var success = await SetupDrawer(() => Task.FromResult(User.Current));
-                    if (!success)
-                    {
-                        EditCredentials();
-                    }
-                    else
-                    {
-                        View?.SetNeedsDisplay();
-                    }
-                }
+                await SetupDrawer(() => Task.FromResult(user));
+                View.SetNeedsDisplay();
             }
-            else
+        }
+
+        public override void ViewDidAppear(bool animated)
+        {
+            base.ViewDidAppear(animated);
+
+            if (_drawer?.Realm == null)
             {
                 EditCredentials();
-                _hasShownCredentials = true;
             }
         }
 
@@ -195,7 +190,7 @@ namespace DrawX.IOS
                 }
             };
 
-            PresentViewController(loginVC, false, null);
+            PresentViewController(loginVC, true, null);
         }
     }
 }

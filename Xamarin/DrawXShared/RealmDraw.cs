@@ -83,6 +83,7 @@ namespace DrawXShared
 
         public Realm Realm { get; private set; }
         private IQueryable<DrawPath> _allPaths;  // we observe all and filter based on changes
+        private IDisposable _notificationToken;
 
         #endregion
 
@@ -91,7 +92,7 @@ namespace DrawXShared
 
         internal Action CredentialsEditor { get; set; }
 
-        internal Action<bool, string> ReportError { get; set; }  // params isError, msg
+        internal Func<bool, string, Task> ReportError { get; set; }  // params isError, msg
         #endregion
 
         #region DrawingState
@@ -171,7 +172,6 @@ namespace DrawXShared
             }
 
             _loginIconBitmap = EmbeddedMedia.BitmapNamed("CloudIcon.png");
-            ReportError = (isError, msg) => System.Diagnostics.Debug.WriteLine(msg); // default expect override by apps
         }
 
         internal void InvalidateCachedPaths()
@@ -195,27 +195,28 @@ namespace DrawXShared
             }
             catch (AuthenticationException)
             {
-                ReportError(false, $"Unknown Username and Password combination");
+                await ReportError(false, $"Unknown Username and Password combination");
             }
             catch (SocketException sockEx)
             {
-                ReportError(true, $"Network error: {sockEx.Message}");
+                await ReportError(true, $"Network error: {sockEx.Message}");
             }
             catch (WebException webEx) when (webEx.Status == WebExceptionStatus.ConnectFailure)
             {
-                ReportError(true, $"Unable to connect to {Settings.ServerIP} - check address {webEx.Message}");
+                await ReportError(true, $"Unable to connect to {Settings.ServerIP} - check address {webEx.Message}");
             }
             catch (Exception ex)
             {
-                ReportError(true, $"Error trying to login to {Settings.ServerIP}: {ex.Message}");
+                await ReportError(true, $"Error trying to login to {Settings.ServerIP}: {ex.Message}");
             }
+
             return false;
         }
 
         private void SetupPathChangeMonitoring()
         {
-            _allPaths = Realm.All<DrawPath>() as IQueryable<DrawPath>;
-            _allPaths.SubscribeForNotifications((sender, changes, error) =>
+            _allPaths = Realm.All<DrawPath>();
+            _notificationToken = _allPaths.SubscribeForNotifications((sender, changes, error) =>
             {
                 // WARNING ChangeSet indices are only valid inside this callback
                 if (changes == null)  // initial call
@@ -276,7 +277,7 @@ namespace DrawXShared
             if (Realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
             {
                 InvalidateCachedPaths();
-                User.Current?.LogOut();
+                DrawXSettingsManager.CurrentUser?.LogOut();
                 CredentialsEditor();  // TODO only invalidate if changed server??
                 return true;
             }

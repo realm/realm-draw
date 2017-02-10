@@ -38,10 +38,9 @@ namespace DrawX.IOS
             LoginButton.Enabled = false;
             try
             {
-                var serverAddress = !string.IsNullOrEmpty(ServerEntry.Text) ? ServerEntry.Text : ServerEntry.Placeholder;
                 DrawXSettingsManager.Write(() =>
                 {
-                    DrawXSettingsManager.Settings.ServerIP = serverAddress;
+                    DrawXSettingsManager.Settings.ServerIP = ServerEntry.Text;
                     DrawXSettingsManager.Settings.Username = UsernameEntry.Text;
                 });
 

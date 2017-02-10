@@ -25,7 +25,10 @@
             android:phoneNumber="false"
             android:password="false"
             android:nextFocusForward="@+id/usernameEntry"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:inputType="textUri"
+            android:linksClickable="false"
+            android:hint="x.x.x.x:9080" />
         <TextView
             android:text="Username"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -42,7 +45,12 @@
             android:tag="usernameEntry"
             android:nextFocusForward="@+id/passwordEntry"
             android:nextFocusUp="@+id/serverIPEntry"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:linksClickable="false"
+            android:textAllCaps="false"
+            android:autoText="false"
+            android:password="false"
+            android:phoneNumber="false" />
         <TextView
             android:text="Password"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -59,6 +67,7 @@
             android:tag="passwordEntry"
             android:phoneNumber="false"
             android:nextFocusUp="@+id/usernameEntry"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:password="true" />
     </LinearLayout>
 </ScrollView>
