@@ -54,6 +54,8 @@ namespace DrawX.IOS
 
         private Task<bool> SetupDrawer(Func<Task<User>> getUserFunc)
         {
+            _drawer?.Dispose();
+
             // scale bounds to match the pixel dimensions of the SkiaSurface
             _drawer = new RealmDraw(
                 _devicePixelMul * (float)View.Bounds.Width,
@@ -89,7 +91,6 @@ namespace DrawX.IOS
             if (View.Bounds != _prevBounds && user != null)
             {
                 await SetupDrawer(() => Task.FromResult(user));
-                View.SetNeedsDisplay();
             }
         }
 
@@ -116,7 +117,7 @@ namespace DrawX.IOS
             {
                 var point = touch.LocationInView(View);
                 _drawer?.StartDrawing((float)point.X * _devicePixelMul, (float)point.Y * _devicePixelMul);
-                View.SetNeedsDisplay();  // probably after touching Pencils
+                View.SetNeedsDisplay();
             }
         }
 
@@ -163,14 +164,16 @@ namespace DrawX.IOS
                     "Erase Canvas?",
                     "This will clear the shared Realm database and erase the canvas. Are you sure you wish to proceed?",
                     UIAlertControllerStyle.Alert);
+                
+                // unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
                 alert.AddAction(UIAlertAction.Create("Erase", UIAlertActionStyle.Destructive, action => _drawer?.ErasePaths()));
                 alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, null));
                 if (alert.PopoverPresentationController != null)
                 {
                     alert.PopoverPresentationController.SourceView = View;
                 }
+
                 PresentViewController(alert, animated: true, completionHandler: null);
-                //// unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
             }
         }
 
@@ -186,7 +189,6 @@ namespace DrawX.IOS
                 if (success)
                 {
                     loginVC.DismissViewController(true, null);
-                    View.SetNeedsDisplay();
                 }
             };
 

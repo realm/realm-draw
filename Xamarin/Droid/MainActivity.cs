@@ -49,9 +49,16 @@ namespace DrawX.Droid
 
         private Task<bool> SetupDrawer(Func<Task<User>> getUserFunc)
         {
+            if (_drawer != null)
+            {
+                _drawer.Dispose();
+                _canvas.PaintSurface -= OnPaintSample;
+                _canvas.Touch -= OnTouch;
+            }
+
             _canvas.PaintSurface += OnPaintSample;
             _canvas.Touch += OnTouch;
-            //// deferred update until can get view bounds
+
             _drawer = new RealmDraw(_canvas.CanvasSize.Width, _canvas.CanvasSize.Height);
             _drawer.CredentialsEditor = () =>
             {

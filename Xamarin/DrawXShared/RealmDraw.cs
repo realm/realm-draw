@@ -71,7 +71,7 @@ namespace DrawXShared
     earlier. (See _currentlyDrawing)
     
     */
-    public class RealmDraw
+    public class RealmDraw : IDisposable
     {
         private const float NORMALISE_TO = 4000.0f;
         private const float PENCIL_MARGIN = 4.0f;
@@ -191,6 +191,8 @@ namespace DrawXShared
                 var loginConf = new SyncConfiguration(user, new Uri($"realm://{Settings.ServerIP}/~/Draw"));
                 Realm = Realm.GetInstance(loginConf);
                 SetupPathChangeMonitoring();
+                InvalidateCachedPaths();
+                RefreshOnRealmUpdate();
                 return true;
             }
             catch (AuthenticationException)
@@ -561,6 +563,16 @@ namespace DrawXShared
                 Realm.RemoveAll<DrawPath>();
                 Realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310
             });
+        }
+
+        public void Dispose()
+        {
+            _notificationToken?.Dispose();
+            Realm?.Dispose();
+
+            RefreshOnRealmUpdate = null;
+            CredentialsEditor = null;
+            ReportError = null;
         }
     }
 }
