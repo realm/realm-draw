@@ -23,13 +23,13 @@ namespace DrawXShared
 {
     public class DrawPath : RealmObject
     {
-		[MapTo("drawerID")]
+        [MapTo("drawerID")]
         public string DrawerId { get; set; }
 
-		[MapTo("color")]
+        [MapTo("color")]
         public string Color { get; set; }
 
-		[MapTo("points")]
+        [MapTo("points")]
         public IList<DrawPoint> Points { get; }
     }
 }

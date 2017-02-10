@@ -22,10 +22,10 @@ namespace DrawXShared
 {
     public class DrawPoint : RealmObject
     {
-		[MapTo("x")]
+        [MapTo("x")]
         public double X { get; set; }
 
-		[MapTo("y")]
+        [MapTo("y")]
         public double Y { get; set; }
     }
 }
