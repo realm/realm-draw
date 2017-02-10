@@ -28,7 +28,5 @@ namespace DrawXShared
         public string ServerIP { get; set; }  // without prefix ie no http://
 
         public string Username { get; set; }
-
-        public string Password { get; set; }
     }
 }

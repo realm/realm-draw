@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -60,8 +60,10 @@ namespace DrawXShared
                 {
                     Write(() =>
                     {
-                        _savedSettings = new DrawXSettings { LastColorUsed = "Indigo" };
-                        _localSettingsRealm.Add(_savedSettings);
+                        _savedSettings = _localSettingsRealm.Add(new DrawXSettings
+                        {
+                            LastColorUsed = "Indigo"
+                        });
                     });
                 }
 
@@ -73,7 +75,7 @@ namespace DrawXShared
         {
             var settingsConf = new RealmConfiguration("DrawXsettings.realm");
             settingsConf.ObjectClasses = new[] { typeof(DrawXSettings) };
-            settingsConf.SchemaVersion = 2;  // set explicitly and bump as we add setting properties
+            settingsConf.SchemaVersion = 3;  // set explicitly and bump as we add setting properties
             _localSettingsRealm = Realm.GetInstance(settingsConf);
         }
 
@@ -81,35 +83,6 @@ namespace DrawXShared
         internal static void Write(Action writer)
         {
             _localSettingsRealm.Write(writer);
-        }
-
-        internal static bool UpdateCredentials(string serverIP, string username, string password)
-        {
-            if (!serverIP.Contains(":"))
-            {
-                // assume they forgot port so add standard port
-                serverIP += ":9080";
-            }
-
-            var changedServer = _savedSettings.ServerIP == null ||
-              !_savedSettings.ServerIP.Equals(serverIP) ||
-              !_savedSettings.Username.Equals(username) ||
-              !_savedSettings.Password.Equals(password);
-            _localSettingsRealm.Write(() =>
-            {
-                _savedSettings.ServerIP = serverIP;
-                _savedSettings.Username = username;
-                _savedSettings.Password = password;
-            });
-            return changedServer;
-        }
-
-        internal static bool HasCredentials()
-        {
-            return _savedSettings != null &&
-                !string.IsNullOrEmpty(_savedSettings.Username) &&
-                !string.IsNullOrEmpty(_savedSettings.Password) &&
-                !string.IsNullOrEmpty(_savedSettings.ServerIP);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -22,6 +22,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Realms;
 using Realms.Exceptions;
 using Realms.Sync;
@@ -81,8 +83,10 @@ namespace DrawXShared
         private float _lastY = INVALID_LAST_COORD;
 
         #region Synchronised data
-        private Realm _realm;
+
+        public Realm Realm { get; private set; }
         private IQueryable<DrawPath> _allPaths;  // we observe all and filter based on changes
+
         #endregion
 
         #region GUI Callbacks
@@ -119,11 +123,8 @@ namespace DrawXShared
         private SKBitmap _loginIconBitmap;
         #endregion
 
-        #region LoginState
-        private bool _waitingForLogin = false;
-        #endregion
-
         #region Settings
+
         private DrawXSettings Settings => DrawXSettingsManager.Settings;
 
         private int _currentColorIndex = -1;  //// store as int for quick check if pencil we draw is current color
@@ -155,6 +156,7 @@ namespace DrawXShared
             var currentByName = SwatchColor.ColorsByName[Settings.LastColorUsed];
             _currentColorIndex = SwatchColor.Colors.IndexOf(currentByName);
         }
+
         #endregion Settings
 
         public RealmDraw(float inWidth, float inHeight)
@@ -182,85 +184,18 @@ namespace DrawXShared
             _currentlyDrawing = null;
         }
 
-        internal async void LoginToServerAsync(User user = null)
+        internal void CreateSynchronizedRealm(User user)
         {
             // in case have lingering subscriptions, clear by clearing the results to which we subscribe
             _allPaths = null;
-
-            _waitingForLogin = true;
-
-            // assuming we are calling Login again after being logged in already, which has been guarded
-            // to see that there IS a change in server/user, we need to logout
-            try
-            {
-                foreach(var activeUser in User.AllLoggedIn)
-                {
-                    activeUser.LogOut();
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine($"Unexpected exception getting User.AllLoggedIn {e}");
-            }
-
-            var s = Settings;
-            //// TODO allow entering Create User flag on credentials to pass in here instead of false
-            Credentials credentials = user == null ? Credentials.UsernamePassword(s.Username, s.Password, false) : null;
-            try
-            {
-                if (user == null)
-                {
-                    user = await User.LoginAsync(credentials, new Uri($"http://{s.ServerIP}"));
-                    Debug.WriteLine($"Got user logged in with refresh token {user.RefreshToken}");
-                }
-                var loginConf = new SyncConfiguration(user, new Uri($"realm://{s.ServerIP}/~/Draw"));
-                _realm = Realm.GetInstance(loginConf);
-                SetupPathChangeMonitoring();
-            }
-            catch (AuthenticationException)
-            {
-                ReportError(false, $"Unknown Username \n{s.Username} and Password \n{s.Password} combination");
-            }
-            catch (System.Net.Sockets.SocketException sockEx)
-            {
-                ReportError(true, $"Network error: {sockEx}");
-            }
-            catch (WebException webEx)
-            {
-                if (webEx.Status == System.Net.WebExceptionStatus.ConnectFailure)
-                {
-                    ReportError(true, $"Unable to connect to {s.ServerIP} - check address {webEx.Message}");
-                }
-                else
-                {
-                    ReportError(true, $"Error trying to login to {s.ServerIP} with {s.Username}/{s.Password} {webEx.Message}");
-                }
-            }
-            catch (Exception e)
-            {
-                if (user == null)
-                {
-                    ReportError(true, $"Error trying to login to {s.ServerIP} with {s.Username}/{s.Password} {e.GetType().FullName} {e.Message}");
-                }
-                else
-                {
-                    ReportError(true, $"Credentials accepted at {s.ServerIP} but then failed to open Realm: {e.GetType().FullName} {e.Message}");
-                }
-            }
-
-            if (user != null)
-            {
-                // cleanup the graphics
-                InvalidateCachedPaths();
-                RefreshOnRealmUpdate();
-            }
-
-            _waitingForLogin = false;
+            var loginConf = new SyncConfiguration(user, new Uri($"realm://{Settings.ServerIP}/~/Draw"));
+            Realm = Realm.GetInstance(loginConf);
+            SetupPathChangeMonitoring();
         }
 
         private void SetupPathChangeMonitoring()
         {
-            _allPaths = _realm.All<DrawPath>() as IQueryable<DrawPath>;
+            _allPaths = Realm.All<DrawPath>() as IQueryable<DrawPath>;
             _allPaths.SubscribeForNotifications((sender, changes, error) =>
             {
                 // WARNING ChangeSet indices are only valid inside this callback
@@ -322,7 +257,8 @@ namespace DrawXShared
             if (_realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
             {
                 InvalidateCachedPaths();
-                CredentialsEditor.Invoke();  // TODO only invalidate if changed server??
+                User.Current?.LogOut();
+                CredentialsEditor();  // TODO only invalidate if changed server??
                 return true;
             }
 
@@ -437,7 +373,7 @@ namespace DrawXShared
         // Note the canvas only exists during this call
         public void DrawTouches(SKCanvas canvas)
         {
-            if (_realm == null)
+            if (Realm == null)
             {
                 return;  // too early to have finished login
             }
@@ -455,7 +391,7 @@ namespace DrawXShared
                     canvas.Clear(SKColors.White);
                     DrawPencils(canvas, paint);
                     DrawLoginIcon(canvas, paint);
-                    foreach (var drawPath in _realm.All<DrawPath>())
+                    foreach (var drawPath in Realm.All<DrawPath>())
                     {
                         DrawAPath(canvas, paint, drawPath);
                     }
@@ -499,15 +435,10 @@ namespace DrawXShared
                 return;
             }
 
+            _ignoringTouches = false;
 
-            // check if needs login, eg: if login failed and touch blank screen should cope
-            if (_realm == null)
+            if (Realm == null)
             {
-                if (!_waitingForLogin)
-                {
-                    LoginToServerAsync();
-                }
-
                 return;  // not yet logged into server, let next touch invoke us
             }
 
@@ -520,11 +451,11 @@ namespace DrawXShared
 
             ScalePointsToStore(ref inX, ref inY);
             _isDrawing = true;
-            _realm.Write(() =>
+            Realm.Write(() =>
             {
                 _drawPath = new DrawPath { color = CurrentColor.Name };  // Realm saves name of color
                 _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
-                _realm.Add(_drawPath);
+                Realm.Add(_drawPath);
             });
         }
 
@@ -535,7 +466,7 @@ namespace DrawXShared
                 return;  // probably touched in pencil area
             }
 
-            if (_realm == null)
+            if (Realm == null)
             {
                 return;  // not yet logged into server
             }
@@ -552,7 +483,7 @@ namespace DrawXShared
             _currentlyDrawing.LineTo(inX, inY);
 
             ScalePointsToStore(ref inX, ref inY);
-            _realm.Write(() =>
+            Realm.Write(() =>
             {
                 _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
             });
@@ -566,7 +497,7 @@ namespace DrawXShared
             }
 
             _isDrawing = false;
-            if (_realm == null)
+            if (Realm == null)
             {
                 return;  // not yet logged into server
             }
@@ -581,7 +512,7 @@ namespace DrawXShared
             }
 
             ScalePointsToStore(ref inX, ref inY);
-            _realm.Write(() =>
+            Realm.Write(() =>
             {
                 if (movedWhilstStopping)
                 {
@@ -605,10 +536,10 @@ namespace DrawXShared
         public void ErasePaths()
         {
             InvalidateCachedPaths();
-            _realm.Write(() =>
+            Realm.Write(() => 
             {
-                _realm.RemoveAll<DrawPath>();
-                _realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310
+                Realm.RemoveAll<DrawPath>();
+                Realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310
             });
         }
     }

@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.Threading;
 using DrawXShared;
 using Foundation;
+using Realms.Sync;
 using SkiaSharp.Views.iOS;
 using UIKit;
 
@@ -44,15 +45,12 @@ namespace DrawX.IOS
         {
             base.ViewDidLoad();
 
-            // relies on override to point its canvas at our OnPaintSample
-            // see ViewDidLayoutSubviews for triggering EditCredentials
             DrawXSettingsManager.InitLocalSettings();
-
-            if (DrawXSettingsManager.HasCredentials())
+            var user = User.Current;
+            if (user != null)
             {
-                // assume we can login and be able to draw
-                // TODO handle initial failure to login despite saved credentials
                 SetupDrawer();
+                _drawer.CreateSynchronizedRealm(user);
             }
         }
 
@@ -87,7 +85,7 @@ namespace DrawX.IOS
 
             // this is the earliest we can show the modal login
             // show unconditionally on launch
-            if (_hasShownCredentials)
+            if (_drawer?.Realm != null || _hasShownCredentials)
             {
                 if (View.Bounds != _prevBounds)
                 {
@@ -160,10 +158,9 @@ namespace DrawX.IOS
             View.SetNeedsDisplay();
         }
 
-        // Erase on Shake
-        public override void MotionBegan(UIEventSubtype eType, UIEvent evt)
+        public override void MotionBegan(UIEventSubtype motion, UIEvent evt)
         {
-            if (eType == UIEventSubtype.MotionShake)
+            if (motion == UIEventSubtype.MotionShake)
             {
                 var alert = UIAlertController.Create(
                     "Erase Canvas?",
@@ -185,21 +182,19 @@ namespace DrawX.IOS
         {
             var sb = UIStoryboard.FromName("LoginScreen", null);
             var loginVC = sb.InstantiateViewController("Login") as LoginViewController;
-            loginVC.OnCloseLogin = (bool changedServer) =>
+            loginVC.PerformLoginAsync = async (credentials) =>
             {
-                DismissModalViewController(false);
-                if (changedServer || _drawer == null)
+                if (credentials != null)
                 {
-                    if (DrawXSettingsManager.HasCredentials())
-                    {
-                        SetupDrawer();
-                        _drawer.LoginToServerAsync();
-                    }
-                    //// TODO allow user to launch locally if server not available
+                    var user = await User.LoginAsync(credentials, new Uri($"http://{DrawXSettingsManager.Settings.ServerIP}"));
+                    SetupDrawer();
+                    _drawer.CreateSynchronizedRealm(user);
                 }
 
+                loginVC.DismissViewController(true, null);
                 View.SetNeedsDisplay();
             };
+
             PresentViewController(loginVC, false, null);
         }
     }
