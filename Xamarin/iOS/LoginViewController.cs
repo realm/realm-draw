@@ -17,8 +17,10 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DrawXShared;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Realms.Sync;
 using UIKit;
 
@@ -33,7 +35,7 @@ namespace DrawX.IOS
         {
         }
 
-        private async void DoLogin()
+        private async void LoginWithPassword()
         {
             LoginButton.Enabled = false;
             try
@@ -54,6 +56,35 @@ namespace DrawX.IOS
             }
         }
 
+        private async void LoginWithAD()
+        {
+            // TODO: verify that server url has been input
+
+            ADLoginButton.Enabled = false;
+            try
+            {
+                DrawXSettingsManager.Write(() =>
+                {
+                    DrawXSettingsManager.Settings.ServerIP = ServerEntry.Text;
+                });
+
+                var authContext = new AuthenticationContext(ADCredentials.CommonAuthority);
+                var response = await authContext.AcquireTokenAsync("https://graph.windows.net", ADCredentials.ClientId, ADCredentials.RedirectUri, new PlatformParameters(this));
+
+                // TODO: uncomment when implemented
+                // var credentials = Credentials.ActiveDirectory(response.AccessToken);
+                var credentials = Credentials.Debug();
+            }
+            catch (Exception ex)
+            {
+                // TODO: handle
+            }
+            finally
+            {
+                ADLoginButton.Enabled = true;
+            }
+        }
+
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
@@ -61,10 +92,8 @@ namespace DrawX.IOS
             ServerEntry.Text = DrawXSettingsManager.Settings.ServerIP;
             UsernameEntry.Text = DrawXSettingsManager.Settings.Username;
 
-            LoginButton.TouchUpInside += (sender, e) =>
-            {
-                DoLogin();
-            };
+            LoginButton.TouchUpInside += (sender, e) => LoginWithPassword();
+            ADLoginButton.TouchUpInside += (sender, e) => LoginWithAD();
 
             #region Return key behaviour on keyboard - Next unti last field then Go
 
@@ -83,7 +112,7 @@ namespace DrawX.IOS
             PasswordEntry.ShouldReturn += (textField) =>
             {
                 PasswordEntry.ResignFirstResponder();
-                DoLogin();
+                LoginWithPassword();
                 return false;
             };
 

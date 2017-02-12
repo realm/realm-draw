@@ -26,6 +26,9 @@ namespace DrawX.Droid
 		
 		public static void UpdateIdValues()
 		{
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Id.agentWebView = global::DrawX.Droid.Resource.Id.agentWebView;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.Layout.WebAuthenticationBroker = global::DrawX.Droid.Resource.Layout.WebAuthenticationBroker;
+			global::Microsoft.IdentityModel.Clients.ActiveDirectory.Resource.String.ApplicationName = global::DrawX.Droid.Resource.String.ApplicationName;
 		}
 		
 		public partial class Attribute
@@ -43,6 +46,9 @@ namespace DrawX.Droid
 		
 		public partial class Id
 		{
+			
+			// aapt resource value: 0x7f050007
+			public const int agentWebView = 2131034119;
 			
 			// aapt resource value: 0x7f050006
 			public const int canvas = 2131034118;
@@ -84,6 +90,9 @@ namespace DrawX.Droid
 			// aapt resource value: 0x7f030001
 			public const int Main = 2130903041;
 			
+			// aapt resource value: 0x7f030002
+			public const int WebAuthenticationBroker = 2130903042;
+			
 			static Layout()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
@@ -113,11 +122,14 @@ namespace DrawX.Droid
 		public partial class String
 		{
 			
-			// aapt resource value: 0x7f040001
-			public const int app_name = 2130968577;
-			
 			// aapt resource value: 0x7f040000
-			public const int hello = 2130968576;
+			public const int ApplicationName = 2130968576;
+			
+			// aapt resource value: 0x7f040002
+			public const int app_name = 2130968578;
+			
+			// aapt resource value: 0x7f040001
+			public const int hello = 2130968577;
 			
 			static String()
 			{
