@@ -60,12 +60,24 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PxG-QJ-hvt">
+                                <rect key="frame" x="95" y="414" width="184" height="30"/>
+                                <state key="normal" title="Login with Active Directory"/>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="or" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ubW-XT-b9l">
+                                <rect key="frame" x="179" y="388" width="16" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="10" firstAttribute="leading" secondItem="19" secondAttribute="leading" id="1AB-aT-c5P"/>
+                            <constraint firstItem="PxG-QJ-hvt" firstAttribute="centerX" secondItem="6" secondAttribute="centerX" id="4ZM-JO-Xsg"/>
                             <constraint firstItem="10" firstAttribute="top" secondItem="19" secondAttribute="bottom" constant="30" id="8QX-Kq-aFe"/>
                             <constraint firstItem="20" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="10" id="9Zv-uK-LrL"/>
+                            <constraint firstItem="ubW-XT-b9l" firstAttribute="top" secondItem="52" secondAttribute="bottom" constant="5" id="Cbu-i9-qEW"/>
                             <constraint firstItem="19" firstAttribute="top" secondItem="9" secondAttribute="bottom" constant="10" id="F7V-wb-nUE"/>
                             <constraint firstItem="10" firstAttribute="trailing" secondItem="19" secondAttribute="trailing" id="ICD-fu-soe"/>
                             <constraint firstItem="20" firstAttribute="trailing" secondItem="19" secondAttribute="trailing" id="PS6-i7-B44"/>
@@ -79,13 +91,16 @@
                             <constraint firstItem="11" firstAttribute="top" secondItem="20" secondAttribute="bottom" constant="30" id="em6-VA-aXN"/>
                             <constraint firstItem="11" firstAttribute="leading" secondItem="19" secondAttribute="leading" id="fKv-ek-cny"/>
                             <constraint firstItem="21" firstAttribute="leading" secondItem="19" secondAttribute="leading" id="g49-aa-RW4"/>
+                            <constraint firstItem="PxG-QJ-hvt" firstAttribute="top" secondItem="ubW-XT-b9l" secondAttribute="bottom" constant="5" id="n0L-oB-S0m"/>
                             <constraint firstItem="52" firstAttribute="centerX" secondItem="6" secondAttribute="centerX" id="nTu-lt-IxD"/>
                             <constraint firstItem="19" firstAttribute="trailing" secondItem="9" secondAttribute="trailing" id="nci-5n-RC4"/>
                             <constraint firstItem="20" firstAttribute="leading" secondItem="19" secondAttribute="leading" id="pC9-Zu-rdf"/>
+                            <constraint firstItem="ubW-XT-b9l" firstAttribute="centerX" secondItem="6" secondAttribute="centerX" id="yjO-5M-CZs"/>
                             <constraint firstItem="19" firstAttribute="leading" secondItem="6" secondAttribute="leading" constant="20" id="ylZ-cR-gG2"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="ADLoginButton" destination="PxG-QJ-hvt" id="f2i-Gt-nKd"/>
                         <outlet property="LoginButton" destination="52" id="name-outlet-52"/>
                         <outlet property="PasswordEntry" destination="21" id="name-outlet-21"/>
                         <outlet property="PasswordLabel" destination="11" id="name-outlet-11"/>

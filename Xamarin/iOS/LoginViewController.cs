@@ -17,8 +17,10 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DrawXShared;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Realms.Sync;
 using UIKit;
 
@@ -33,9 +35,39 @@ namespace DrawX.IOS
         {
         }
 
-        private async void DoLogin()
+        private void LoginWithPassword()
         {
-            LoginButton.Enabled = false;
+            LoginCore(LoginButton, () => Task.FromResult(Credentials.UsernamePassword(UsernameEntry.Text, PasswordEntry.Text, false)));
+        }
+
+        private void LoginWithAD()
+        {
+            LoginCore(ADLoginButton, async () =>
+            {
+                var clientId = ADCredentials.ClientId;
+                if (clientId == "your-client-id")
+                {
+                    throw new Exception("Please update ADCredentials.ClientId with the correct ClientId of your application.");
+                }
+
+                var redirectUri = ADCredentials.RedirectUri;
+                if (redirectUri.AbsolutePath == "http://your-redirect-uri")
+                {
+                    throw new Exception("Please update ADCredentials.RedirectUri with the correct RedirectUri of your application.");
+                }
+
+                var authContext = new AuthenticationContext(ADCredentials.CommonAuthority);
+                var response = await authContext.AcquireTokenAsync("https://graph.windows.net", ADCredentials.ClientId, ADCredentials.RedirectUri, new PlatformParameters(this));
+
+                // TODO: uncomment when implemented
+                // var credentials = Credentials.ActiveDirectory(response.AccessToken);
+                return Credentials.Debug();
+            });
+        }
+
+        private async Task LoginCore(UIButton sender, Func<Task<Credentials>> getCredentialsFunc)
+        {
+            sender.Enabled = false;
             try
             {
                 DrawXSettingsManager.Write(() =>
@@ -44,13 +76,21 @@ namespace DrawX.IOS
                     DrawXSettingsManager.Settings.Username = UsernameEntry.Text;
                 });
 
-                var credentials = Credentials.UsernamePassword(UsernameEntry.Text, PasswordEntry.Text, false);
+                var credentials = await getCredentialsFunc();
 
                 await PerformLoginAsync(credentials);
             }
+            catch (Exception ex)
+            {
+                var tcs = new TaskCompletionSource<object>();
+                var alertController = UIAlertController.Create("Unable to login", ex.Message, UIAlertControllerStyle.Alert);
+                alertController.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default, _ => tcs.TrySetResult(null)));
+                PresentViewController(alertController, animated: true, completionHandler: null);
+                await tcs.Task;
+            }
             finally
             {
-                LoginButton.Enabled = true;
+                sender.Enabled = true;
             }
         }
 
@@ -61,10 +101,8 @@ namespace DrawX.IOS
             ServerEntry.Text = DrawXSettingsManager.Settings.ServerIP;
             UsernameEntry.Text = DrawXSettingsManager.Settings.Username;
 
-            LoginButton.TouchUpInside += (sender, e) =>
-            {
-                DoLogin();
-            };
+            LoginButton.TouchUpInside += (sender, e) => LoginWithPassword();
+            ADLoginButton.TouchUpInside += (sender, e) => LoginWithAD();
 
             #region Return key behaviour on keyboard - Next unti last field then Go
 
@@ -83,7 +121,7 @@ namespace DrawX.IOS
             PasswordEntry.ShouldReturn += (textField) =>
             {
                 PasswordEntry.ResignFirstResponder();
-                DoLogin();
+                LoginWithPassword();
                 return false;
             };
 

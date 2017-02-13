@@ -22,6 +22,7 @@ using Android.App;
 using Android.OS;
 using Android.Views;
 using DrawXShared;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Realms.Sync;
 using SkiaSharp.Views.Android;
 
@@ -163,7 +164,7 @@ namespace DrawX.Droid
 
             _isEditingCredentials = true;
 
-            var dialog = new LoginDialog();
+            var dialog = new LoginDialog(this);
             dialog.PerformLoginAsync = async (credentials) =>
             {
                 var success = await SetupDrawer(() => User.LoginAsync(credentials, new Uri($"http://{DrawXSettingsManager.Settings.ServerIP}")));
@@ -179,6 +180,12 @@ namespace DrawX.Droid
             dialog.Cancelable = false;
 
             dialog.Show(FragmentManager, "login");
+        }
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Android.Content.Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            AuthenticationAgentContinuationHelper.SetAuthenticationAgentContinuationEventArgs(requestCode, resultCode, data);
         }
     }
 }

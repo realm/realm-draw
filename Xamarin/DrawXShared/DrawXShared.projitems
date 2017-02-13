@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DrawXSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DrawXSettingsManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EmbeddedMedia.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ADCredentials.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Media\Charcoal.png" />
