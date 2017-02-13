@@ -102,7 +102,17 @@ namespace DrawX.Droid
                 }
                 else if (v == _adLoginButton)
                 {
-                    // TODO: verify that server url has been input
+                    var clientId = ADCredentials.ClientId;
+                    if (clientId == "your-client-id")
+                    {
+                        throw new Exception("Please update ADCredentials.ClientId with the correct ClientId of your application.");
+                    }
+
+                    var redirectUri = ADCredentials.RedirectUri;
+                    if (redirectUri.AbsolutePath == "http://your-redirect-uri")
+                    {
+                        throw new Exception("Please update ADCredentials.RedirectUri with the correct RedirectUri of your application.");
+                    }
 
                     var authContext = new AuthenticationContext(ADCredentials.CommonAuthority);
                     var response = await authContext.AcquireTokenAsync("https://graph.windows.net", ADCredentials.ClientId, ADCredentials.RedirectUri, new PlatformParameters(_parentActivity));
@@ -116,7 +126,15 @@ namespace DrawX.Droid
             }
             catch (Exception ex)
             {
-                // TODO: handle
+                var tcs = new TaskCompletionSource<object>();
+                
+                new AlertDialog.Builder(Activity)
+                               .SetTitle("Unable to login")
+                               .SetMessage(ex.Message)
+                               .SetPositiveButton("OK", (_, __) => tcs.TrySetResult(null))
+                               .Show();
+
+                await tcs.Task;
             }
             finally
             {

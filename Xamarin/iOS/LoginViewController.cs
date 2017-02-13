@@ -35,9 +35,39 @@ namespace DrawX.IOS
         {
         }
 
-        private async void LoginWithPassword()
+        private void LoginWithPassword()
         {
-            LoginButton.Enabled = false;
+            LoginCore(LoginButton, () => Task.FromResult(Credentials.UsernamePassword(UsernameEntry.Text, PasswordEntry.Text, false)));
+        }
+
+        private void LoginWithAD()
+        {
+            LoginCore(ADLoginButton, async () =>
+            {
+                var clientId = ADCredentials.ClientId;
+                if (clientId == "your-client-id")
+                {
+                    throw new Exception("Please update ADCredentials.ClientId with the correct ClientId of your application.");
+                }
+
+                var redirectUri = ADCredentials.RedirectUri;
+                if (redirectUri.AbsolutePath == "http://your-redirect-uri")
+                {
+                    throw new Exception("Please update ADCredentials.RedirectUri with the correct RedirectUri of your application.");
+                }
+
+                var authContext = new AuthenticationContext(ADCredentials.CommonAuthority);
+                var response = await authContext.AcquireTokenAsync("https://graph.windows.net", ADCredentials.ClientId, ADCredentials.RedirectUri, new PlatformParameters(this));
+
+                // TODO: uncomment when implemented
+                // var credentials = Credentials.ActiveDirectory(response.AccessToken);
+                return Credentials.Debug();
+            });
+        }
+
+        private async Task LoginCore(UIButton sender, Func<Task<Credentials>> getCredentialsFunc)
+        {
+            sender.Enabled = false;
             try
             {
                 DrawXSettingsManager.Write(() =>
@@ -46,42 +76,21 @@ namespace DrawX.IOS
                     DrawXSettingsManager.Settings.Username = UsernameEntry.Text;
                 });
 
-                var credentials = Credentials.UsernamePassword(UsernameEntry.Text, PasswordEntry.Text, false);
+                var credentials = await getCredentialsFunc();
 
                 await PerformLoginAsync(credentials);
             }
-            finally
-            {
-                LoginButton.Enabled = true;
-            }
-        }
-
-        private async void LoginWithAD()
-        {
-            // TODO: verify that server url has been input
-
-            ADLoginButton.Enabled = false;
-            try
-            {
-                DrawXSettingsManager.Write(() =>
-                {
-                    DrawXSettingsManager.Settings.ServerIP = ServerEntry.Text;
-                });
-
-                var authContext = new AuthenticationContext(ADCredentials.CommonAuthority);
-                var response = await authContext.AcquireTokenAsync("https://graph.windows.net", ADCredentials.ClientId, ADCredentials.RedirectUri, new PlatformParameters(this));
-
-                // TODO: uncomment when implemented
-                // var credentials = Credentials.ActiveDirectory(response.AccessToken);
-                var credentials = Credentials.Debug();
-            }
             catch (Exception ex)
             {
-                // TODO: handle
+                var tcs = new TaskCompletionSource<object>();
+                var alertController = UIAlertController.Create("Unable to login", ex.Message, UIAlertControllerStyle.Alert);
+                alertController.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default, _ => tcs.TrySetResult(null)));
+                PresentViewController(alertController, animated: true, completionHandler: null);
+                await tcs.Task;
             }
             finally
             {
-                ADLoginButton.Enabled = true;
+                sender.Enabled = true;
             }
         }
 
