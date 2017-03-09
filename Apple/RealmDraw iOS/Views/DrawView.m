@@ -68,6 +68,7 @@
         };
         
         self.currentColorName = @"Black";
+        [self becomeFirstResponder];
     }
     return self;
 }
