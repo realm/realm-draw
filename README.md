@@ -1,5 +1,7 @@
 # Realm-Draw
 
+![Screenshot)(screenshot.jpg)
+
 This is the demo application seen in the Realm Mobile Platform [launch video][1], a real-time collaborative drawing program available for Android, iOS and Xamarin. Any number of users may draw on a single shared canvas in any given moment.
 
 ## Prerequisites
