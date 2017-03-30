@@ -26,7 +26,7 @@ The demo application seen in the Realm Mobile Platform [launch video][1], Realm 
 
 # Setting Up Realm Mobile Platform
 
-In order to properly use Realm Puzzle, an instance of the Realm Object Server must be running for which each client copy of the app can connect.
+In order to properly use Realm Draw, an instance of the Realm Object Server must be running for which each client copy of the app can connect.
 
 * The [macOS version](https://realm.io/docs/get-started/installation/mac/) can be downloaded and run as a `localhost` on any desktop Mac.
 * The [Linux version](https://realm.io/docs/get-started/installation/linux/) can be installed on a publicly accessible server and accessed over the internet.
