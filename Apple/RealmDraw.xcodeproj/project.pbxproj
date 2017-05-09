@@ -36,7 +36,6 @@
 		2290FF5A1E2FD7230039DACF /* RealmDraw iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RealmDraw iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2290FFAD1E2FD8E30039DACF /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		2290FFAE1E2FD8E30039DACF /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		2290FFAF1E2FD8E30039DACF /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		2290FFB01E2FD8E30039DACF /* Draw-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Draw-Info.plist"; sourceTree = "<group>"; };
 		2290FFB21E2FD8E30039DACF /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		2290FFB31E2FD8E30039DACF /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -107,7 +106,6 @@
 			children = (
 				2290FFAD1E2FD8E30039DACF /* AppDelegate.h */,
 				2290FFAE1E2FD8E30039DACF /* AppDelegate.m */,
-				2290FFAF1E2FD8E30039DACF /* Constants.h */,
 				2290FFB01E2FD8E30039DACF /* Draw-Info.plist */,
 				2290FFB21E2FD8E30039DACF /* Images.xcassets */,
 				2290FFB31E2FD8E30039DACF /* main.m */,
@@ -180,7 +178,6 @@
 			buildConfigurationList = 2290FF871E2FD7230039DACF /* Build configuration list for PBXNativeTarget "RealmDraw iOS" */;
 			buildPhases = (
 				6E872CB4A289A4942E679B27 /* [CP] Check Pods Manifest.lock */,
-				2290FFCC1E2FDBB30039DACF /* Get Current Device IP Address */,
 				2290FF561E2FD7230039DACF /* Sources */,
 				2290FF571E2FD7230039DACF /* Frameworks */,
 				2290FF581E2FD7230039DACF /* Resources */,
@@ -223,7 +220,7 @@
 		2290FF521E2FD7230039DACF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = Realm;
 				TargetAttributes = {
 					2290FF591E2FD7230039DACF = {
@@ -277,20 +274,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2290FFCC1E2FDBB30039DACF /* Get Current Device IP Address */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Get Current Device IP Address";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "LOCAL_IP_ADDR=$(ipconfig getifaddr $(netstat -f inet -rant | awk '/default/ { print $6; exit }'))\necho \"static NSString * const kIPAddress = @\\\"${LOCAL_IP_ADDR:-127.0.0.1}\\\";\" > \"$SRCROOT/RealmDraw iOS/Constants.h\"";
-		};
 		47335FEED2BC5F6D62D50A11 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -303,7 +286,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		6E872CB4A289A4942E679B27 /* [CP] Check Pods Manifest.lock */ = {
@@ -318,7 +301,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		86C8B5E3BA3C5A77218998F3 /* [CP] Copy Pods Resources */ = {
@@ -512,6 +495,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9CA1560200F93E9FAF20FA34 /* Pods-RealmDraw iOS.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = QX5CR2FTN2;
 				INFOPLIST_FILE = "$(SRCROOT)/RealmDraw iOS/Draw-Info.plist";
@@ -525,6 +509,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 28163A59F031AA27BCE52FE4 /* Pods-RealmDraw iOS.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = QX5CR2FTN2;
 				INFOPLIST_FILE = "$(SRCROOT)/RealmDraw iOS/Draw-Info.plist";
@@ -538,6 +523,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3F7A9E90AA79B700F6426DDF /* Pods-RealmDrawTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				DEVELOPMENT_TEAM = QX5CR2FTN2;
@@ -554,6 +540,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D8387B7AF2EA7DD5F0E449DD /* Pods-RealmDrawTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				DEVELOPMENT_TEAM = QX5CR2FTN2;
@@ -594,6 +581,7 @@
 				22BB761C1E8C7B0C00317E4B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

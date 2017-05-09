@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0820"
+   LastUpgradeVersion = "0830"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -32,7 +32,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2290FF721E2FD7230039DACF"
+               BlueprintIdentifier = "22BB76131E8C7B0B00317E4B"
                BuildableName = "RealmDrawTests.xctest"
                BlueprintName = "RealmDrawTests"
                ReferencedContainer = "container:RealmDraw.xcodeproj">

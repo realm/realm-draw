@@ -19,7 +19,6 @@
 #import "AppDelegate.h"
 #import <Realm/Realm.h>
 #import "DrawView.h"
-#import "Constants.h"
 
 @import RealmLoginKit;
 
@@ -41,9 +40,7 @@
     [self.window makeKeyAndVisible];
 
     RLMLoginViewController *loginController = [[RLMLoginViewController alloc] initWithStyle:LoginViewControllerStyleLightTranslucent];
-    loginController.serverURL = kIPAddress;
-    [self.window.rootViewController presentViewController:loginController animated:NO completion:nil];
-
+    loginController.modalPresentationStyle = UIModalPresentationOverFullScreen;
     __weak typeof(loginController) weakController = loginController;
     loginController.loginSuccessfulHandler = ^(RLMSyncUser *user) {
         // Logged in setup the default Realm
@@ -61,6 +58,11 @@
 
         [self.window.rootViewController dismissViewControllerAnimated:YES completion:nil];
     };
+
+    // Present the login controller on the next run loop iteration to ensure the root controller has already presented.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.window.rootViewController presentViewController:loginController animated:YES completion:nil];
+    });
 
     return YES;
 }
