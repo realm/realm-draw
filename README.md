@@ -69,3 +69,5 @@ Distributed under the Apache license. See ``LICENSE`` for more information.
 [4]: https://github.com/realm-demos/realm-draw/tree/master/Android
 [5]: https://github.com/realm-demos/realm-draw/tree/master/Apple
 [6]: https://github.com/realm-demos/realm-draw/tree/master/Xamarin
+
+![analytics](https://ga-beacon.appspot.com/UA-50247013-2/realm-draw/README?pixel)
