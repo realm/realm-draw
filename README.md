@@ -26,13 +26,16 @@ The demo application seen in the Realm Mobile Platform [launch video][1], Realm 
 ### Xamarin
 - Android 4.0.3
 - iOS 9.3
+- Realm Platform / Realm Object Server 2.0 and above
 
-# Setting Up Realm Mobile Platform
 
-In order to properly use Realm Draw, an instance of the Realm Object Server must be running for which each client copy of the app can connect.
+### Realm Platform
 
-* The [macOS version](https://realm.io/docs/get-started/installation/mac/) can be downloaded and run as a `localhost` on any desktop Mac.
-* The [Linux version](https://realm.io/docs/get-started/installation/linux/) can be installed on a publicly accessible server and accessed over the internet.
+This application demonstrates features of the [Realm Platform](http://lrealm.io) and needs to have a working instance of the Realm Object Server version 2.0 or higher available to make data available between instances of the Puzzle app. The Realm Mobile Platform can be downloaded from [Realm  Platform](http://realm.io/pricing).  It is delivered as a series of as a modular server modules that on top of nodejs and can be installed on macOS or Linux.  For information on installing the Realm Platform Server components, please download a copy of the [Developer edition](https://realm.io/pricing/).
+
+### Realm Studio
+Another useful tool is [Realm Studio](https://realm.io/products/realm-studio/) which is available for macOS, Linux, Windows and allows developers to inspect and manage Realms. Realm Studio is recommended for all developers and can be downloaded from the [Realm web site](https://realm.io/products/realm-studio/).
+
 
 # Building and Running
 
@@ -51,7 +54,7 @@ You'll be required to create an admin account the first time you run an instance
 
 # Known Issues
 
-The Android and iOS versions of the app will interoperate; the Xamarin version currently can only share drawings with other copies of itself (compiled for either iOS or Android). This is due to a difference in the way the Xamarin platform handles its drawing canvas compared to the native iOS and Android code bases.
+The Android and iOS versions of the app will inter-operate; the Xamarin version currently can only share drawings with other copies of itself (compiled for either iOS or Android). This is due to a difference in the way the Xamarin platform handles its drawing canvas compared to the native iOS and Android code bases.
 
 # Contributing
 
