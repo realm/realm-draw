@@ -12,7 +12,7 @@ The demo application seen in the Realm Platform [launch video][1], Realm Draw is
 
 - [x] Allows multiple users to contribute drawings to a shared canvas in real-time.
 - [x] Canvas can be reset by shaking the device briefly.
-- [x] Can connect to any running instance of Realm Mobile Platform.
+- [x] Can connect to any running instance of Realm Object Server.
 
 # Requirements
 
