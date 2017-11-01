@@ -50,7 +50,7 @@ import io.realm.draw.sensor.ShakeSensorEventListener;
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback, View.OnClickListener {
     private static final String REALM_URL = "realm://" + BuildConfig.OBJECT_SERVER_IP + ":9080/~/Draw";
     private static final String AUTH_URL = "http://" + BuildConfig.OBJECT_SERVER_IP + ":9080/auth";
-    private static final String ID = "demo1@realm.io";
+    private static final String ID = "demo@realm.io";
     private static final String PASSWORD = "password";
     private static final int EDGE_WIDTH = 683;
     private volatile Realm realm;

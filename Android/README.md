@@ -8,9 +8,8 @@ This version is the Android version.
 
 ## Installation Instructions
 
-1. [Download the Realm Mobile Platform](https://realm.io/docs/realm-mobile-platform/get-started/) Developer Edition.
-2. Run a local instance of the Realm Mobile Platform.
-3. Create a new user, with the email `demo@realm.io` and the password `password`.
+1. [Install the Realm Platform](https://realm.io/docs/get-started/installation/developer-edition/#installing-realm-object-server) Developer Edition.
+2. Run a local instance of the Realm Platform: `ros start`.
 4. Open the Android Project located at `realm-draw/RealmDraw` with Android Studio, and build the Draw app and deploy it to an Android device.
 5. When Realm Draw starts you will be automatically be logged in as demo@realm.io and be able to start drawing. The Realm Object server address you enter can be local or it can be an instance running on any of our other supported Linux platforms which may also be downloaded from [Realm](https://realm.io). In either case you should ensure your firewall allows access to ports 9080 and 27800 as these are needed by the application in order to communicate wth the Realm Object Server.
 
