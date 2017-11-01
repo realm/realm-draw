@@ -25,6 +25,5 @@ public class DrawApplication extends Application{
     public void onCreate() {
         super.onCreate();
         Realm.init(this);
-//        RealmLog.setLevel(Log.VERBOSE);
     }
 }

@@ -29,10 +29,12 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Iterator;
 
+import io.realm.ErrorCode;
 import io.realm.ObjectServerError;
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -48,7 +50,7 @@ import io.realm.draw.sensor.ShakeSensorEventListener;
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback, View.OnClickListener {
     private static final String REALM_URL = "realm://" + BuildConfig.OBJECT_SERVER_IP + ":9080/~/Draw";
     private static final String AUTH_URL = "http://" + BuildConfig.OBJECT_SERVER_IP + ":9080/auth";
-    private static final String ID = "demo@realm.io";
+    private static final String ID = "demo1@realm.io";
     private static final String PASSWORD = "password";
     private static final int EDGE_WIDTH = 683;
     private volatile Realm realm;
@@ -73,8 +75,21 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        createUserIfNeededAndAndLogin();
+
+        surfaceView = findViewById(R.id.surface_view);
+        surfaceView.getHolder().addCallback(MainActivity.this);
+
+        generateColorMap();
+        bindButtons();
+        initializeShakeSensor();
+    }
+
+    private void createUserIfNeededAndAndLogin() {
         final SyncCredentials syncCredentials = SyncCredentials.usernamePassword(ID, PASSWORD, false);
-        SyncUser.loginAsync(syncCredentials, AUTH_URL, new SyncUser.Callback() {
+
+        // Assume user exist already first time. If that fails, create it.
+        SyncUser.loginAsync(syncCredentials, AUTH_URL, new SyncUser.Callback<SyncUser>() {
             @Override
             public void onSuccess(SyncUser user) {
                 final SyncConfiguration syncConfiguration = new SyncConfiguration.Builder(user, REALM_URL).build();
@@ -84,15 +99,15 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
             @Override
             public void onError(ObjectServerError error) {
+                if (error.getErrorCode() == ErrorCode.INVALID_CREDENTIALS) {
+                    // User did not exist, create it
+                    SyncUser.loginAsync(SyncCredentials.usernamePassword(ID, PASSWORD, true), AUTH_URL, this);
+                } else {
+                    String errorMsg = String.format("(%s) %s", error.getErrorCode(), error.getErrorMessage());
+                    Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                }
             }
         });
-
-        surfaceView = (SurfaceView) findViewById(R.id.surface_view);
-        surfaceView.getHolder().addCallback(MainActivity.this);
-
-        generateColorMap();
-        bindButtons();
-        initializeShakeSensor();
     }
 
     @Override
@@ -141,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             view.setOnClickListener(this);
         }
 
-        currentPencil = (PencilView) findViewById(R.id.charcoal);
+        currentPencil = findViewById(R.id.charcoal);
         currentPencil.setSelected(true);
     }
 
