@@ -1,12 +1,12 @@
 # Realm Draw
-> A Collaborative Drawing App, where multiple users can draw to a shared canvas at the same time
+> A Collaborative Drawing App, where multiple users can draw to a shared canvas at the same time.
 
 ![Screenshot](screenshot.jpg)
 
 [![CI Status](http://img.shields.io/travis/realm-demos/realm-draw.svg?style=flat)](http://api.travis-ci.org/realm-demos/realm-draw.svg)
 [![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/realm-demos/realm-draw/master/LICENSE)
 
-The demo application seen in the Realm Platform [launch video][1], Realm Draw is a real-time collaborative drawing program available for Android, iOS and Xamarin. Any number of users may draw on a single shared canvas at any given moment with the strokes appearing on all devices in real time.
+The demo application seen in the Realm Platform [launch video](https://realm.io/news/introducing-realm-mobile-platform/), Realm Draw is a real-time collaborative drawing program available for Android, iOS and Xamarin. Any number of users may draw on a single shared canvas at any given moment with the strokes appearing on all devices in real time.
 
 # Features
 
@@ -33,7 +33,7 @@ The demo application seen in the Realm Platform [launch video][1], Realm Draw is
 
 ### Realm Platform
 
-This application demonstrates features of the [Realm Platform](https://realm.io/products/realm-platform/) and needs to have a working instance of the Realm Object Server version 2.x to make data available between instances of the Puzzle app. The Realm Object Server can be installed via npm as a node application for macOS or Linux. Please see the [installation instructions](https://realm.io/docs/get-started/installation/developer-edition/). If you already got Node.js installed, it's a one-liner.
+This application demonstrates features of the [Realm Platform](https://realm.io/products/realm-platform/) and needs to have a working instance of the Realm Object Server version 2.x to make data available between instances of the Draw app. The Realm Object Server can be installed via npm as a node application for macOS or Linux. Please see the [installation instructions](https://realm.io/docs/get-started/installation/developer-edition/). If you already got Node.js installed, it's a one-liner.
 
 
 ### Realm Studio
@@ -42,11 +42,12 @@ Another useful tool is [Realm Studio](https://realm.io/products/realm-studio/) w
 
 # Building and Running
 
-Follow the README files in the platform-specific subdirectory of this repository.
+Follow the README files in the platform-specific subdirectory of this repository:
 
-* [Android][4]
-* [iOS][5]
-* [Xamarin][6]
+* [Android](Android)
+* [iOS](Apple)
+* [Xamarin](Xamarin)
+
 
 # Connecting to the Realm Object Server
 When launching the app each time, you'll be presented with a login form in order to connect to the right Realm Object Server instance.
@@ -68,12 +69,4 @@ This project adheres to the [Contributor Covenant Code of Conduct](https://realm
 # License
 
 Distributed under the Apache license. See ``LICENSE`` for more information.
-
-[1]: https://realm.io/news/introducing-realm-mobile-platform/
-[2]: https://realm.io/docs/get-started/installation/mac/
-[3]: https://realm.io/docs/get-started/installation/linux/
-[4]: https://github.com/realm-demos/realm-draw/tree/master/Android
-[5]: https://github.com/realm-demos/realm-draw/tree/master/Apple
-[6]: https://github.com/realm-demos/realm-draw/tree/master/Xamarin
-
 ![analytics](https://ga-beacon.appspot.com/UA-50247013-2/realm-draw/README?pixel)
