@@ -2,7 +2,7 @@
 # platform :ios, '9.0'
 
 def shared_pods
-	 pod 'RealmSwift', :git => 'https://github.com/realm/realm-cocoa.git', :submodules => true	
+	pod 'RealmSwift'
 	pod 'RealmLoginKit'
 end
 
