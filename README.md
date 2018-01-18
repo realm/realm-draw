@@ -4,7 +4,7 @@
 ![Screenshot](screenshot.jpg)
 
 [![CI Status](http://img.shields.io/travis/realm-demos/realm-draw.svg?style=flat)](http://api.travis-ci.org/realm-demos/realm-draw.svg)
-[![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/realm-demos/realm-draw/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](https://raw.githubusercontent.com/realm/realm-draw/LICENSE)
 
 The demo application seen in the Realm Platform [launch video](https://realm.io/news/introducing-realm-mobile-platform/), Realm Draw is a real-time collaborative drawing program available for Android, iOS and Xamarin. Any number of users may draw on a single shared canvas at any given moment with the strokes appearing on all devices in real time.
 
