@@ -52,10 +52,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private static final String AUTH_URL = "http://" + BuildConfig.OBJECT_SERVER_IP + ":9080/auth";
     private static final String ID = "demo@realm.io";
     private static final String PASSWORD = "password";
-    private static final int EDGE_WIDTH = 683;
+    private static final double RATIO = 0.5;
     private volatile Realm realm;
     private SurfaceView surfaceView;
-    private double ratio = -1;
     private double marginLeft;
     private double marginTop;
     private DrawThread drawThread;
@@ -222,8 +221,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 || action == MotionEvent.ACTION_CANCEL) {
             float x = event.getRawX();
             float y = event.getRawY();
-            double pointX = (x - marginLeft - viewLocation[0]) * ratio;
-            double pointY = (y - marginTop - viewLocation[1]) * ratio;
+            double pointX = (x - marginLeft - viewLocation[0]) * RATIO;
+            double pointY = (y - marginTop - viewLocation[1]) * RATIO;
 
             if (action == MotionEvent.ACTION_DOWN) {
                 realm.beginTransaction();
@@ -274,16 +273,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {
         boolean isPortrait = width < height;
         if (isPortrait) {
-            ratio = (double) EDGE_WIDTH / height;
-        } else {
-            ratio = (double) EDGE_WIDTH / width;
-        }
-        if (isPortrait) {
             marginLeft = (width - height) / 2.0;
             marginTop = 0;
-        } else {
-            marginLeft = 0;
-            marginTop = (height - width) / 2.0;
         }
     }
 
@@ -293,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             drawThread.shutdown();
             drawThread = null;
         }
-        ratio = -1;
     }
 
     @Override
@@ -327,9 +317,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         @Override
         public void run() {
-            while (ratio < 0 && !isInterrupted()) {
-            }
-
             if (isInterrupted()) {
                 return;
             }
@@ -373,17 +360,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                                 paint.setColor(nameToColorMap.get(currentColor));
                             }
                             paint.setStyle(Paint.Style.STROKE);
-                            paint.setStrokeWidth((float) (4 / ratio));
+                            paint.setStrokeWidth((float) (4 / RATIO));
                             final Iterator<DrawPoint> iterator = points.iterator();
                             final DrawPoint firstPoint = iterator.next();
                             final Path path = new Path();
-                            final float firstX = (float) ((firstPoint.getX() / ratio) + marginLeft);
-                            final float firstY = (float) ((firstPoint.getY() / ratio) + marginTop);
+                            final float firstX = (float) ((firstPoint.getX() / RATIO) + marginLeft);
+                            final float firstY = (float) ((firstPoint.getY() / RATIO) + marginTop);
                             path.moveTo(firstX, firstY);
                             while(iterator.hasNext()) {
                                 DrawPoint point = iterator.next();
-                                final float x = (float) ((point.getX() / ratio) + marginLeft);
-                                final float y = (float) ((point.getY() / ratio) + marginTop);
+                                final float x = (float) ((point.getX() / RATIO) + marginLeft);
+                                final float y = (float) ((point.getY() / RATIO) + marginTop);
                                 path.lineTo(x, y);
                             }
                             canvas.drawPath(path, paint);
