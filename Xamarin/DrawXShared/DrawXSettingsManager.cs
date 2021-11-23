@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -17,11 +17,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Realms;
-using Realms.Exceptions;
-using Realms.Sync;
 
 namespace DrawXShared
 {
@@ -29,23 +26,6 @@ namespace DrawXShared
     {
         private static Realm _localSettingsRealm;
         private static DrawXSettings _savedSettings;
-        internal static User LoggedInUser
-        {
-            get
-            {
-                // hides the exception handling of User.Current
-                try
-                {
-                    return User.Current;
-                }
-                catch (RealmException re)
-                {
-                    // do nothing - assume multiple users logged in so will have to use login dialog to choose
-                    // TODO - present a Currently Logged in picker in this case?
-                    return null;
-                }
-            }
-        }
 
         public static DrawXSettings Settings
         {
@@ -60,8 +40,10 @@ namespace DrawXShared
                 {
                     Write(() =>
                     {
-                        _savedSettings = new DrawXSettings { LastColorUsed = "Indigo" };
-                        _localSettingsRealm.Add(_savedSettings);
+                        _savedSettings = _localSettingsRealm.Add(new DrawXSettings
+                        {
+                            LastColorUsed = "Indigo"
+                        });
                     });
                 }
 
@@ -69,47 +51,18 @@ namespace DrawXShared
             }
         }
 
-        internal static void InitLocalSettings()
+        public static void InitLocalSettings()
         {
             var settingsConf = new RealmConfiguration("DrawXsettings.realm");
             settingsConf.ObjectClasses = new[] { typeof(DrawXSettings) };
-            settingsConf.SchemaVersion = 2;  // set explicitly and bump as we add setting properties
+            settingsConf.SchemaVersion = 3;  // set explicitly and bump as we add setting properties
             _localSettingsRealm = Realm.GetInstance(settingsConf);
         }
 
         // bit of a hack which only works when the caller has objects already on the _realmLocalSettings Realm
-        internal static void Write(Action writer)
+        public static void Write(Action writer)
         {
             _localSettingsRealm.Write(writer);
-        }
-
-        internal static bool UpdateCredentials(string serverIP, string username, string password)
-        {
-            if (!serverIP.Contains(":"))
-            {
-                // assume they forgot port so add standard port
-                serverIP += ":9080";
-            }
-
-            var changedServer = _savedSettings.ServerIP == null ||
-              !_savedSettings.ServerIP.Equals(serverIP) ||
-              !_savedSettings.Username.Equals(username) ||
-              !_savedSettings.Password.Equals(password);
-            _localSettingsRealm.Write(() =>
-            {
-                _savedSettings.ServerIP = serverIP;
-                _savedSettings.Username = username;
-                _savedSettings.Password = password;
-            });
-            return changedServer;
-        }
-
-        internal static bool HasCredentials()
-        {
-            return _savedSettings != null &&
-                !string.IsNullOrEmpty(_savedSettings.Username) &&
-                !string.IsNullOrEmpty(_savedSettings.Password) &&
-                !string.IsNullOrEmpty(_savedSettings.ServerIP);
         }
     }
 }

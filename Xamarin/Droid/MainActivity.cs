@@ -17,10 +17,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
 using Android.Views;
 using DrawXShared;
+using Realms.Sync;
 using SkiaSharp.Views.Android;
 
 namespace DrawX.Droid
@@ -30,7 +32,7 @@ namespace DrawX.Droid
     {
         private RealmDraw _drawer;
         private SKCanvasView _canvas;
-        private bool _hasShownCredentials;
+        private bool _isEditingCredentials;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -40,64 +42,66 @@ namespace DrawX.Droid
             SetContentView(Resource.Layout.Main);
 
             DrawXSettingsManager.InitLocalSettings();
+
+            _canvas = FindViewById<SKCanvasView>(Resource.Id.canvas);
+            _canvas.ViewTreeObserver.GlobalLayout += OnViewRendered;
         }
 
-        private void SetupDrawer()
+        private Task<bool> SetupDrawer(Func<Task<User>> getUserFunc)
         {
-            _canvas = FindViewById<SKCanvasView>(Resource.Id.canvas);
+            if (_drawer != null)
+            {
+                _drawer.Dispose();
+                _canvas.PaintSurface -= OnPaintSample;
+                _canvas.Touch -= OnTouch;
+            }
+
             _canvas.PaintSurface += OnPaintSample;
             _canvas.Touch += OnTouch;
-            //// deferred update until can get view bounds
+
             _drawer = new RealmDraw(_canvas.CanvasSize.Width, _canvas.CanvasSize.Height);
             _drawer.CredentialsEditor = () =>
             {
-                EditCredentials();
+                RunOnUiThread(EditCredentials);
             };
 
-            _drawer.RefreshOnRealmUpdate = () =>
-            {
-                System.Diagnostics.Debug.WriteLine("Refresh callback triggered by Realm");
-                _canvas.Invalidate();
-            };
+            _drawer.RefreshOnRealmUpdate = _canvas.Invalidate;
 
             _drawer.ReportError = (bool isError, string msg) =>
             {
-                AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.SetTitle(isError ? "Realm Error" : "Warning");
-                alert.SetMessage(msg);
-                alert.SetPositiveButton("OK", (senderAlert, args) =>
-                {
-                });
+                var tcs = new TaskCompletionSource<object>();
 
                 RunOnUiThread(() =>
                 {
-                    alert.Show();
+                    new AlertDialog.Builder(this)
+                                   .SetTitle(isError ? "Realm Error" : "Warning")
+                                   .SetMessage(msg)
+                                   .SetPositiveButton("OK", (senderAlert, args) =>
+                                   {
+                                       tcs.TrySetResult(null);
+                                   })
+                                   .Show();
                 });
+
+                return tcs.Task;
             };
+
+            return _drawer.LoginUserAsync(getUserFunc);
         }
 
-        protected override void OnStart()
+        private async void OnViewRendered(object sender, EventArgs e)
         {
-            base.OnStart();
-            if (_drawer == null)
+            _canvas.ViewTreeObserver.GlobalLayout -= OnViewRendered;
+
+            var user = User.Current;
+            if (user != null)
             {
-                if (DrawXSettingsManager.HasCredentials())
-                {
-                    // assume we can login and be able to draw
-                    // TODO handle initial failure to login despite saved credentials
-                    SetupDrawer();
-                }
+                await SetupDrawer(() => Task.FromResult(user));
             }
 
-            if (DrawXSettingsManager.LoggedInUser != null)
-            {
-                _drawer.LoginToServerAsync(DrawXSettingsManager.LoggedInUser);
-                _hasShownCredentials = true;  // skip credentials if saved user in store
-            }
-            if (!_hasShownCredentials)
+            if (_drawer?.Realm == null)
             {
                 EditCredentials();
-                _hasShownCredentials = true;
             }
         }
 
@@ -113,8 +117,8 @@ namespace DrawX.Droid
                 return;  // in case managed to trigger before focus event finished setup
             }
 
-            float fx = touchEventArgs.Event.GetX();
-            float fy = touchEventArgs.Event.GetY();
+            var fx = touchEventArgs.Event.GetX();
+            var fy = touchEventArgs.Event.GetY();
             var needsRefresh = false;
             switch (touchEventArgs.Event.Action & MotionEventActions.Mask)
             {
@@ -143,27 +147,36 @@ namespace DrawX.Droid
         // use the back button in preference to trying to detect shake, which is not built in
         public override void OnBackPressed()
         {
-            _drawer.ErasePaths();
-            _canvas.Invalidate();
+            if (_drawer.Realm != null)
+            {
+                _drawer.ErasePaths();
+                _canvas.Invalidate();
+            }
         }
 
         private void EditCredentials()
         {
-            var dialog = new LoginDialog();
-            dialog.OnCloseLogin = (bool changedServer) =>
+            if (_isEditingCredentials)
             {
-                if (changedServer || _drawer == null)
-                {
-                    if (DrawXSettingsManager.HasCredentials())
-                    {
-                        SetupDrawer();  // pointless unless contact server
-                        _drawer.LoginToServerAsync();
-                    }
-                    //// TODO allow user to launch locally if server not available
-                }
+                return;
+            }
 
-                _canvas.Invalidate();
+            _isEditingCredentials = true;
+
+            var dialog = new LoginDialog();
+            dialog.PerformLoginAsync = async (credentials) =>
+            {
+                var success = await SetupDrawer(() => User.LoginAsync(credentials, new Uri($"http://{DrawXSettingsManager.Settings.ServerIP}")));
+
+                if (success)
+                {
+                    dialog.Dismiss();
+                    _isEditingCredentials = false;
+                    _canvas.Invalidate();
+                }
             };
+
+            dialog.Cancelable = false;
 
             dialog.Show(FragmentManager, "login");
         }

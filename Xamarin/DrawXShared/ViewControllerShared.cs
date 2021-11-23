@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -17,10 +17,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Diagnostics;
-using System.Threading;
+using System.Threading.Tasks;
 using DrawXShared;
 using Foundation;
+using Realms.Sync;
+using Realms.Sync.Exceptions;
 using SkiaSharp.Views.iOS;
 using UIKit;
 
@@ -31,7 +32,6 @@ namespace DrawX.IOS
     public class ViewControllerShared : UIViewController
     {
         private RealmDraw _drawer;
-        private bool _hasShownCredentials;  // flag to show on initial layout only
         private CoreGraphics.CGRect _prevBounds;
         private float _devicePixelMul;  // usually 2.0 except on weird iPhone 6+
 
@@ -44,20 +44,18 @@ namespace DrawX.IOS
         {
             base.ViewDidLoad();
 
-            // relies on override to point its canvas at our OnPaintSample
-            // see ViewDidLayoutSubviews for triggering EditCredentials
             DrawXSettingsManager.InitLocalSettings();
-
-            if (DrawXSettingsManager.HasCredentials())
+            var user = User.Current;
+            if (user != null)
             {
-                // assume we can login and be able to draw
-                // TODO handle initial failure to login despite saved credentials
-                SetupDrawer();
+                SetupDrawer(() => Task.FromResult(user));
             }
         }
 
-        private void SetupDrawer()
+        private Task<bool> SetupDrawer(Func<Task<User>> getUserFunc)
         {
+            _drawer?.Dispose();
+
             // scale bounds to match the pixel dimensions of the SkiaSurface
             _drawer = new RealmDraw(
                 _devicePixelMul * (float)View.Bounds.Width,
@@ -75,36 +73,34 @@ namespace DrawX.IOS
 
             _drawer.ReportError = (bool isError, string msg) =>
             {
-                var alertController = UIAlertController.Create(isError?"Realm Error":"Warning", msg, UIAlertControllerStyle.Alert);
-                alertController.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, null));
-                PresentViewController(alertController, true, null);
+                var tcs = new TaskCompletionSource<object>();
+                var alertController = UIAlertController.Create(isError ? "Realm Error" : "Warning", msg, UIAlertControllerStyle.Alert);
+                alertController.AddAction(UIAlertAction.Create("Ok", UIAlertActionStyle.Default, _ => tcs.TrySetResult(null)));
+                (PresentedViewController ?? this).PresentViewController(alertController, true, null);
+                return tcs.Task;
             };
+
+            return _drawer.LoginUserAsync(getUserFunc);
         }
 
-        public override void ViewDidLayoutSubviews()
+        public async override void ViewDidLayoutSubviews()
         {
             base.ViewDidLayoutSubviews();
 
-            // this is the earliest we can show the modal login
-            // show unconditionally on launch
-            if (_hasShownCredentials)
+            var user = User.Current;
+            if (View.Bounds != _prevBounds && user != null)
             {
-                if (View.Bounds != _prevBounds)
-                {
-                    SetupDrawer();
-                    var user = DrawXSettingsManager.LoggedInUser;
-                    if (user != null)
-                    {
-                        _drawer.LoginToServerAsync(user);
-                        _hasShownCredentials = true;  // skip credentials if saved user in store
-                    }
-                    View?.SetNeedsDisplay();
-                }
+                await SetupDrawer(() => Task.FromResult(user));
             }
-            else
+        }
+
+        public override void ViewDidAppear(bool animated)
+        {
+            base.ViewDidAppear(animated);
+
+            if (_drawer?.Realm == null)
             {
                 EditCredentials();
-                _hasShownCredentials = true;
             }
         }
 
@@ -121,7 +117,7 @@ namespace DrawX.IOS
             {
                 var point = touch.LocationInView(View);
                 _drawer?.StartDrawing((float)point.X * _devicePixelMul, (float)point.Y * _devicePixelMul);
-                View.SetNeedsDisplay();  // probably after touching Pencils
+                View.SetNeedsDisplay();
             }
         }
 
@@ -160,23 +156,24 @@ namespace DrawX.IOS
             View.SetNeedsDisplay();
         }
 
-        // Erase on Shake
-        public override void MotionBegan(UIEventSubtype eType, UIEvent evt)
+        public override void MotionBegan(UIEventSubtype motion, UIEvent evt)
         {
-            if (eType == UIEventSubtype.MotionShake)
+            if (motion == UIEventSubtype.MotionShake)
             {
                 var alert = UIAlertController.Create(
                     "Erase Canvas?",
                     "This will clear the shared Realm database and erase the canvas. Are you sure you wish to proceed?",
                     UIAlertControllerStyle.Alert);
+                
+                // unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
                 alert.AddAction(UIAlertAction.Create("Erase", UIAlertActionStyle.Destructive, action => _drawer?.ErasePaths()));
                 alert.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, null));
                 if (alert.PopoverPresentationController != null)
                 {
                     alert.PopoverPresentationController.SourceView = View;
                 }
+
                 PresentViewController(alert, animated: true, completionHandler: null);
-                //// unlike other gesture actions, don't call View.SetNeedsDisplay but let major Realm change prompt redisplay
             }
         }
 
@@ -185,22 +182,17 @@ namespace DrawX.IOS
         {
             var sb = UIStoryboard.FromName("LoginScreen", null);
             var loginVC = sb.InstantiateViewController("Login") as LoginViewController;
-            loginVC.OnCloseLogin = (bool changedServer) =>
+            loginVC.PerformLoginAsync = async (credentials) =>
             {
-                DismissModalViewController(false);
-                if (changedServer || _drawer == null)
-                {
-                    if (DrawXSettingsManager.HasCredentials())
-                    {
-                        SetupDrawer();
-                        _drawer.LoginToServerAsync();
-                    }
-                    //// TODO allow user to launch locally if server not available
-                }
+                var success = await SetupDrawer(() => User.LoginAsync(credentials, new Uri($"http://{DrawXSettingsManager.Settings.ServerIP}")));
 
-                View.SetNeedsDisplay();
+                if (success)
+                {
+                    loginVC.DismissViewController(true, null);
+                }
             };
-            PresentViewController(loginVC, false, null);
+
+            PresentViewController(loginVC, true, null);
         }
     }
 }

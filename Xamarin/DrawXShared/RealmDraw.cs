@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -18,12 +18,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Realms;
-using Realms.Exceptions;
 using Realms.Sync;
 using Realms.Sync.Exceptions;
 using SkiaSharp;
@@ -72,7 +71,7 @@ namespace DrawXShared
     earlier. (See _currentlyDrawing)
     
     */
-    public class RealmDraw
+    public class RealmDraw : IDisposable
     {
         private const float NORMALISE_TO = 4000.0f;
         private const float PENCIL_MARGIN = 4.0f;
@@ -81,8 +80,11 @@ namespace DrawXShared
         private float _lastY = INVALID_LAST_COORD;
 
         #region Synchronised data
-        private Realm _realm;
+
+        public Realm Realm { get; private set; }
         private IQueryable<DrawPath> _allPaths;  // we observe all and filter based on changes
+        private IDisposable _notificationToken;
+
         #endregion
 
         #region GUI Callbacks
@@ -90,21 +92,21 @@ namespace DrawXShared
 
         internal Action CredentialsEditor { get; set; }
 
-        internal Action<bool, string> ReportError { get; set; }  // params isError, msg
+        internal Func<bool, string, Task> ReportError { get; set; }  // params isError, msg
         #endregion
 
         #region DrawingState
-        private bool _isDrawing = false;
-        private bool _ignoringTouches = false;
+        private bool _isDrawing;
+        private bool _ignoringTouches;
         private DrawPath _drawPath;
         private SKPath _currentlyDrawing;  // caches for responsive drawing on this device
         private float _canvasWidth, _canvasHeight;
-        private IList<DrawPath> _pathsToDraw = null;  // set in notification callback
+        private IList<DrawPath> _pathsToDraw;  // set in notification callback
         #endregion
 
         #region CachedCanvas
         private int _canvasSaveCount;  // from SaveLayer
-        private bool _hasSavedBitmap = false;  // separate flag so we don't rely on any given value in _canvasSaveCount
+        private bool _hasSavedBitmap;  // separate flag so we don't rely on any given value in _canvasSaveCount
         private bool _redrawPathsAtNextDraw = true;
         #endregion
 
@@ -119,11 +121,8 @@ namespace DrawXShared
         private SKBitmap _loginIconBitmap;
         #endregion
 
-        #region LoginState
-        private bool _waitingForLogin = false;
-        #endregion
-
         #region Settings
+
         private DrawXSettings Settings => DrawXSettingsManager.Settings;
 
         private int _currentColorIndex = -1;  //// store as int for quick check if pencil we draw is current color
@@ -155,6 +154,7 @@ namespace DrawXShared
             var currentByName = SwatchColor.ColorsByName[Settings.LastColorUsed];
             _currentColorIndex = SwatchColor.Colors.IndexOf(currentByName);
         }
+
         #endregion Settings
 
         public RealmDraw(float inWidth, float inHeight)
@@ -172,7 +172,6 @@ namespace DrawXShared
             }
 
             _loginIconBitmap = EmbeddedMedia.BitmapNamed("CloudIcon.png");
-            ReportError = (isError, msg) => System.Diagnostics.Debug.WriteLine(msg); // default expect override by apps
         }
 
         internal void InvalidateCachedPaths()
@@ -182,86 +181,44 @@ namespace DrawXShared
             _currentlyDrawing = null;
         }
 
-        internal async void LoginToServerAsync(User user = null)
+        internal async Task<bool> LoginUserAsync(Func<Task<User>> userFunc)
         {
-            // in case have lingering subscriptions, clear by clearing the results to which we subscribe
-            _allPaths = null;
-
-            _waitingForLogin = true;
-
-            // assuming we are calling Login again after being logged in already, which has been guarded
-            // to see that there IS a change in server/user, we need to logout
             try
             {
-                foreach(var activeUser in User.AllLoggedIn)
-                {
-                    activeUser.LogOut();
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine($"Unexpected exception getting User.AllLoggedIn {e}");
-            }
-
-            var s = Settings;
-            //// TODO allow entering Create User flag on credentials to pass in here instead of false
-            Credentials credentials = user == null ? Credentials.UsernamePassword(s.Username, s.Password, false) : null;
-            try
-            {
-                if (user == null)
-                {
-                    user = await User.LoginAsync(credentials, new Uri($"http://{s.ServerIP}"));
-                    Debug.WriteLine($"Got user logged in with refresh token {user.RefreshToken}");
-                }
-                var loginConf = new SyncConfiguration(user, new Uri($"realm://{s.ServerIP}/~/Draw"));
-                _realm = Realm.GetInstance(loginConf);
+                var user = await userFunc();
+                // in case have lingering subscriptions, clear by clearing the results to which we subscribe
+                _allPaths = null;
+                var loginConf = new SyncConfiguration(user, new Uri($"realm://{Settings.ServerIP}/~/Draw"));
+                Realm = Realm.GetInstance(loginConf);
                 SetupPathChangeMonitoring();
+                InvalidateCachedPaths();
+                RefreshOnRealmUpdate();
+                return true;
             }
             catch (AuthenticationException)
             {
-                ReportError(false, $"Unknown Username \n{s.Username} and Password \n{s.Password} combination");
+                await ReportError(false, $"Unknown Username and Password combination");
             }
-            catch (System.Net.Sockets.SocketException sockEx)
+            catch (SocketException sockEx)
             {
-                ReportError(true, $"Network error: {sockEx}");
+                await ReportError(true, $"Network error: {sockEx.Message}");
             }
-            catch (WebException webEx)
+            catch (WebException webEx) when (webEx.Status == WebExceptionStatus.ConnectFailure)
             {
-                if (webEx.Status == System.Net.WebExceptionStatus.ConnectFailure)
-                {
-                    ReportError(true, $"Unable to connect to {s.ServerIP} - check address {webEx.Message}");
-                }
-                else
-                {
-                    ReportError(true, $"Error trying to login to {s.ServerIP} with {s.Username}/{s.Password} {webEx.Message}");
-                }
+                await ReportError(true, $"Unable to connect to {Settings.ServerIP} - check address {webEx.Message}");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                if (user == null)
-                {
-                    ReportError(true, $"Error trying to login to {s.ServerIP} with {s.Username}/{s.Password} {e.GetType().FullName} {e.Message}");
-                }
-                else
-                {
-                    ReportError(true, $"Credentials accepted at {s.ServerIP} but then failed to open Realm: {e.GetType().FullName} {e.Message}");
-                }
+                await ReportError(true, $"Error trying to login to {Settings.ServerIP}: {ex.Message}");
             }
 
-            if (user != null)
-            {
-                // cleanup the graphics
-                InvalidateCachedPaths();
-                RefreshOnRealmUpdate();
-            }
-
-            _waitingForLogin = false;
+            return false;
         }
 
         private void SetupPathChangeMonitoring()
         {
-            _allPaths = _realm.All<DrawPath>() as IQueryable<DrawPath>;
-            _allPaths.SubscribeForNotifications((sender, changes, error) =>
+            _allPaths = Realm.All<DrawPath>();
+            _notificationToken = _allPaths.SubscribeForNotifications((sender, changes, error) =>
             {
                 // WARNING ChangeSet indices are only valid inside this callback
                 if (changes == null)  // initial call
@@ -319,10 +276,11 @@ namespace DrawXShared
 
         private bool TouchInControlArea(float inX, float inY)
         {
-            if (_realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
+            if (Realm == null || _loginIconTouchRect.Contains(inX, inY))  // treat entire screen as control area
             {
                 InvalidateCachedPaths();
-                CredentialsEditor.Invoke();  // TODO only invalidate if changed server??
+                User.Current?.LogOut();
+                CredentialsEditor();  // TODO only invalidate if changed server??
                 return true;
             }
 
@@ -437,7 +395,7 @@ namespace DrawXShared
         // Note the canvas only exists during this call
         public void DrawTouches(SKCanvas canvas)
         {
-            if (_realm == null)
+            if (Realm == null)
             {
                 return;  // too early to have finished login
             }
@@ -455,7 +413,7 @@ namespace DrawXShared
                     canvas.Clear(SKColors.White);
                     DrawPencils(canvas, paint);
                     DrawLoginIcon(canvas, paint);
-                    foreach (var drawPath in _realm.All<DrawPath>())
+                    foreach (var drawPath in Realm.All<DrawPath>())
                     {
                         DrawAPath(canvas, paint, drawPath);
                     }
@@ -499,15 +457,10 @@ namespace DrawXShared
                 return;
             }
 
+            _ignoringTouches = false;
 
-            // check if needs login, eg: if login failed and touch blank screen should cope
-            if (_realm == null)
+            if (Realm == null)
             {
-                if (!_waitingForLogin)
-                {
-                    LoginToServerAsync();
-                }
-
                 return;  // not yet logged into server, let next touch invoke us
             }
 
@@ -520,11 +473,11 @@ namespace DrawXShared
 
             ScalePointsToStore(ref inX, ref inY);
             _isDrawing = true;
-            _realm.Write(() =>
+            Realm.Write(() =>
             {
                 _drawPath = new DrawPath { color = CurrentColor.Name };  // Realm saves name of color
                 _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
-                _realm.Add(_drawPath);
+                Realm.Add(_drawPath);
             });
         }
 
@@ -535,7 +488,7 @@ namespace DrawXShared
                 return;  // probably touched in pencil area
             }
 
-            if (_realm == null)
+            if (Realm == null)
             {
                 return;  // not yet logged into server
             }
@@ -552,7 +505,7 @@ namespace DrawXShared
             _currentlyDrawing.LineTo(inX, inY);
 
             ScalePointsToStore(ref inX, ref inY);
-            _realm.Write(() =>
+            Realm.Write(() =>
             {
                 _drawPath.points.Add(new DrawPoint { x = inX, y = inY });
             });
@@ -566,7 +519,7 @@ namespace DrawXShared
             }
 
             _isDrawing = false;
-            if (_realm == null)
+            if (Realm == null)
             {
                 return;  // not yet logged into server
             }
@@ -581,7 +534,7 @@ namespace DrawXShared
             }
 
             ScalePointsToStore(ref inX, ref inY);
-            _realm.Write(() =>
+            Realm.Write(() =>
             {
                 if (movedWhilstStopping)
                 {
@@ -605,11 +558,21 @@ namespace DrawXShared
         public void ErasePaths()
         {
             InvalidateCachedPaths();
-            _realm.Write(() =>
+            Realm.Write(() => 
             {
-                _realm.RemoveAll<DrawPath>();
-                _realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310
+                Realm.RemoveAll<DrawPath>();
+                Realm.RemoveAll<DrawPoint>();  // we don't yet have cascading delete https://github.com/realm/realm-dotnet/issues/310
             });
+        }
+
+        public void Dispose()
+        {
+            _notificationToken?.Dispose();
+            Realm?.Dispose();
+
+            RefreshOnRealmUpdate = null;
+            CredentialsEditor = null;
+            ReportError = null;
         }
     }
 }

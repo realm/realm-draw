@@ -17,50 +17,57 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Threading.Tasks;
 using DrawXShared;
-using Foundation;
+using Realms.Sync;
 using UIKit;
 
 namespace DrawX.IOS
 {
     // TODO enable Login button only if enter text in all three
-    // TODO handle return key to move between fields and trigger launch (and change storyboard settings on fields if do so)
     public partial class LoginViewController : UIViewController
     {
-        public Action<bool> OnCloseLogin { get; set; }  // caller should set so can use to dismiss
+        public Func<Credentials, Task> PerformLoginAsync { get; set; }  // caller should set so can use to dismiss
 
         public LoginViewController(IntPtr handle) : base(handle)
         {
         }
 
-        private void DoLogin()
+        private async void DoLogin()
         {
-            bool changedServer = DrawXSettingsManager.UpdateCredentials(ServerEntry.Text, UsernameEntry.Text, PasswordEntry.Text);
-            OnCloseLogin(changedServer);
+            LoginButton.Enabled = false;
+            try
+            {
+                DrawXSettingsManager.Write(() =>
+                {
+                    DrawXSettingsManager.Settings.ServerIP = ServerEntry.Text;
+                    DrawXSettingsManager.Settings.Username = UsernameEntry.Text;
+                });
+
+                var credentials = Credentials.UsernamePassword(UsernameEntry.Text, PasswordEntry.Text, false);
+
+                await PerformLoginAsync(credentials);
+            }
+            finally
+            {
+                LoginButton.Enabled = true;
+            }
         }
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            var s = DrawXSettingsManager.Settings;
-            ServerEntry.Text = s.ServerIP;
-            UsernameEntry.Text = s.Username;
-            PasswordEntry.Text = s.Password;
+
+            ServerEntry.Text = DrawXSettingsManager.Settings.ServerIP;
+            UsernameEntry.Text = DrawXSettingsManager.Settings.Username;
 
             LoginButton.TouchUpInside += (sender, e) =>
             {
                 DoLogin();
             };
 
-            // you can only cancel logging in if already logged in, otherwise it is meaningless
-            CancelButton.Enabled = (DrawXSettingsManager.LoggedInUser != null);
-                
-            CancelButton.TouchUpInside += (sender, e) =>
-            {
-                OnCloseLogin(false);
-            };
-
             #region Return key behaviour on keyboard - Next unti last field then Go
+
             ServerEntry.ShouldReturn += (textField) =>
             {
                 UsernameEntry.BecomeFirstResponder();
@@ -75,10 +82,11 @@ namespace DrawX.IOS
 
             PasswordEntry.ShouldReturn += (textField) =>
             {
-                ((UITextField)textField).ResignFirstResponder();
+                PasswordEntry.ResignFirstResponder();
                 DoLogin();
                 return false;
             };
+
             #endregion
         }
 
