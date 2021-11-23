@@ -38,7 +38,7 @@ namespace DrawXShared
                 {
                     return User.Current;
                 }
-                catch (RealmException re)
+                catch (RealmException)
                 {
                     // do nothing - assume multiple users logged in so will have to use login dialog to choose
                     // TODO - present a Currently Logged in picker in this case?
@@ -53,15 +53,14 @@ namespace DrawXShared
             {
                 if (_savedSettings == null)
                 {
-                    _savedSettings = _localSettingsRealm.All<DrawXSettings>().FirstOrDefault();
+                    _savedSettings = _localSettingsRealm.All<DrawXSettings>().SingleOrDefault();
                 }
 
                 if (_savedSettings == null)
                 {
                     Write(() =>
                     {
-                        _savedSettings = new DrawXSettings { LastColorUsed = "Indigo" };
-                        _localSettingsRealm.Add(_savedSettings);
+                        _savedSettings = _localSettingsRealm.Add(new DrawXSettings());
                     });
                 }
 

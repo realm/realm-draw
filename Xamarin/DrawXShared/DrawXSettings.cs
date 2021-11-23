@@ -20,10 +20,10 @@ using Realms;
 
 namespace DrawXShared
 {
-    // will only ever have a single object stored in the Realm
+    // We store settings in a dedicated Realm. This Realm will contain one instance of this class.
     public class DrawXSettings : RealmObject
     {
-        public string LastColorUsed { get; set; }
+        public string LastColorUsed { get; set; } = "Indigo";
 
         public string ServerIP { get; set; }  // without prefix ie no http://
 
